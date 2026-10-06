@@ -28,7 +28,9 @@ service Spring Boot indépendant, enregistré dans un registre **Eureka**.
 | Service | Dossier | Port | Rôle |
 |---------|---------|------|------|
 | discovery | `backend/discovery/` | 8761 | Eureka Server — registre de services |
-| SRV | `backend/microservices/SRV/` | 8082 | Premier microservice, client Eureka |
+| SRV | `backend/microservices/SRV/` | 8082 | Microservice services/réservations, client Eureka |
+| marketplace | `backend/microservices/marketplace/` | 8083 | Microservice marketplace, client Eureka |
+| Delivery | `backend/microservices/Delivery/` | 8084 | Microservice livraison (JPA + PostgreSQL), client Eureka |
 
 ---
 
@@ -54,7 +56,15 @@ cd backend/discovery
 # Terminal 2 — SRV sur :8082
 cd backend\microservices\SRV
 .\mvnw.cmd spring-boot:run
+
+# Terminal 3 — marketplace sur :8083
+cd backend\microservices\marketplace
+.\mvnw.cmd spring-boot:run
+
+# Terminal 4 — Delivery sur :8084
+cd backend\microservices\Delivery
+.\mvnw.cmd spring-boot:run
 ```
 
-Vérification : ouvrir <http://localhost:8761> → `SRV` doit apparaître dans
-*Instances currently registered with Eureka*.
+Vérification : ouvrir <http://localhost:8761> → les services (`SRV`, `marketplace`,
+`Delivery`) doivent apparaître dans *Instances currently registered with Eureka*.

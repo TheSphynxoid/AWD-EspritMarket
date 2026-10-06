@@ -12,9 +12,15 @@ package "backend/" {
   rectangle "discovery\n----\n**Eureka Server**\n**:8761**" as EU
 
   rectangle "SRV\n----\n**Microservice**\n**:8082**" as SRV
+
+  rectangle "marketplace\n----\n**Microservice**\n**:8083**" as MKT
+
+  rectangle "Delivery\n----\n**Microservice**\n**:8084**" as DEL
 }
 
 SRV -up-> EU : register / heartbeat
+MKT -up-> EU : register / heartbeat
+DEL -up-> EU : register / heartbeat
 
 Client -down-> SRV : direct calls (dev)
 
