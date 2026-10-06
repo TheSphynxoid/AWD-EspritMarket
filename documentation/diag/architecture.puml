@@ -18,9 +18,9 @@ package "backend/" {
   rectangle "Delivery\n----\n**Microservice**\n**:8084**" as DEL
 }
 
-SRV -up-> EU : register / heartbeat
-MKT -up-> EU : register / heartbeat
-DEL -up-> EU : register / heartbeat
+SRV -up-> EU : register
+MKT -up-> EU : register
+DEL -up-> EU : register
 
 Client -down-> SRV : direct calls (dev)
 
