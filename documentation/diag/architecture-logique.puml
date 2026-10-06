@@ -1,0 +1,43 @@
+@startuml architecture-logique
+
+title <size:22>**Architecture logique — EspritMarket**</size>
+
+skinparam dpi 150
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam rectangleRoundCorner 12
+skinparam packageRectangleRoundCorner 18
+skinparam ArrowFontSize 12
+skinparam TitleBorderThickness 2
+skinparam TitleBorderRoundCorner 14
+
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+
+actor "Client\n(browser)" as Client
+
+rectangle "**Eureka Server**\n(annuaire des services)\n**:8761**" as EU #EFEFEF
+
+package "Microservices Spring Boot" #DFF2F0 {
+  rectangle "**SRV**\noffres de services, réservations\n<b>port :8082</b>" as SRV
+  rectangle "**marketplace**\nplace de marché\n<b>port :8083</b>" as MKT
+  rectangle "**Delivery**\nlivraisons\n<b>port :8084</b>" as DEL
+}
+
+package "Serveur PostgreSQL" #FDEBD2 {
+  database "**awd-Delivery**\nb :5432" as AWDDB
+}
+
+Client -down-> SRV : appel HTTP
+Client -down-> MKT : appel HTTP
+Client -down-> DEL : appel HTTP
+
+SRV .up.> EU : enregistrement
+MKT .up.> EU : enregistrement
+DEL .up.> EU : enregistrement
+
+DEL -down-> AWDDB : JDBC
+
+@enduml

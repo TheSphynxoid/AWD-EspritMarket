@@ -21,9 +21,19 @@ service Spring Boot indépendant, enregistré dans un registre **Eureka**.
 
 ## Architecture
 
-![Architecture globale](documentation/diag/architecture.png)
+### Architecture logique
 
-> Source : [`documentation/diag/architecture.puml`](documentation/diag/architecture.puml)
+Découpage en services, responsabilités de chaque service, base dédiée et enregistrement dans Eureka.
+
+![Architecture logique](documentation/diag/architecture-logique.png)
+
+### Architecture physique (déploiement)
+
+Poste client, serveurs applicatifs avec leurs ports, serveur PostgreSQL et protocoles échangés.
+
+![Architecture physique](documentation/diag/architecture-physique.png)
+
+> Sources PlantUML : [`documentation/diag/`](documentation/diag/)
 
 | Service | Dossier | Port | Rôle |
 |---------|---------|------|------|
