@@ -1,0 +1,44 @@
+# Build output
+target/
+build/
+*.class
+
+# Maven wrapper jar (the wrapper scripts download it; keep maven-wrapper.properties)
+.mvn/wrapper/maven-wrapper.jar
+
+# Initializr helper
+HELP.md
+
+# Logs
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.factorypath
+
+# Environment / secrets
+.env
+.env.*
+!**/.env.example
+
+# Node / Angular (future frontend)
+node_modules/
+dist/
+.angular/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# LaTeX (report build artifacts)
+*.aux
+*.toc
+*.out
+*.synctex.gz

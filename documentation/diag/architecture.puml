@@ -1,0 +1,21 @@
+@startuml architecture
+
+skinparam dpi 150
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam defaultFontName "Segoe UI"
+
+actor "Client\n(browser)" as Client
+
+package "backend/" {
+
+  rectangle "discovery\n----\n**Eureka Server**\n**:8761**" as EU
+
+  rectangle "SRV\n----\n**Microservice**\n**:8082**" as SRV
+}
+
+SRV -up-> EU : register / heartbeat
+
+Client -down-> SRV : direct calls (dev)
+
+@enduml
