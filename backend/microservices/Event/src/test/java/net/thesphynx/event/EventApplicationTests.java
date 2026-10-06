@@ -1,4 +1,4 @@
-package tn.esprit.spring.event;
+package net.thesphynx.event;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

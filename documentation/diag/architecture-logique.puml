@@ -8,34 +8,35 @@ skinparam defaultFontName "Segoe UI"
 skinparam rectangleRoundCorner 12
 skinparam packageRectangleRoundCorner 18
 skinparam ArrowFontSize 12
-skinparam TitleBorderThickness 2
-skinparam TitleBorderRoundCorner 14
 
 skinparam rectangle {
   BackgroundColor #FFFFFF
   BorderColor #333333
 }
 
-actor "Client\n(browser)" as Client
+actor "Poste client\nNavigateur" as Client
 
-rectangle "**Eureka Server**\n(annuaire des services)\n**:8761**" as EU #EFEFEF
+rectangle "**Eureka Server**\n(annuaire des services)\n<b>:8761</b>" as EU #EFEFEF
 
-package "Microservices Spring Boot" #DFF2F0 {
+package "Microservices Spring Boot" as MS #DFF2F0 {
   rectangle "**SRV**\noffres de services, réservations\n<b>port :8082</b>" as SRV
   rectangle "**marketplace**\nplace de marché\n<b>port :8083</b>" as MKT
   rectangle "**Delivery**\nlivraisons\n<b>port :8084</b>" as DEL
   rectangle "**event**\névénementiel\n<b>port :8085</b>" as EVT
+  SRV -[hidden]right-> MKT
+  MKT -[hidden]right-> DEL
+  DEL -[hidden]right-> EVT
 }
 
-package "Serveur PostgreSQL" #FDEBD2 {
-  database "**awd-Delivery**\nb :5432" as AWDDB
-  database "**awd-event**\nb :5432" as EVTDB
+package "Serveur PostgreSQL" as DBS #FDEBD2 {
+  database "**awd-Delivery**\n<b>:5432</b>" as AWDDB
+  database "**awd-event**\n<b>:5432</b>" as EVTDB
+  AWDDB -[hidden]right-> EVTDB
 }
 
-Client -down-> SRV : appel HTTP
-Client -down-> MKT : appel HTTP
-Client -down-> DEL : appel HTTP
-Client -down-> EVT : appel HTTP
+Client -[hidden]right-> EU
+
+Client -down-> MS : appel HTTP
 
 SRV .up.> EU : enregistrement
 MKT .up.> EU : enregistrement

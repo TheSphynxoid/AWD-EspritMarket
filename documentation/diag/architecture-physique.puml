@@ -2,15 +2,12 @@
 
 title <size:22>**Architecture physique (déploiement) — EspritMarket**</size>
 
-left to right direction
-
 skinparam dpi 150
 skinparam shadowing false
 skinparam defaultFontName "Segoe UI"
 skinparam rectangleRoundCorner 12
 skinparam packageRectangleRoundCorner 18
 skinparam ArrowFontSize 12
-skinparam linetype polyline
 
 skinparam rectangle {
   BackgroundColor #FFFFFF
@@ -21,32 +18,32 @@ actor "Poste client\nNavigateur" as Client
 
 rectangle "**Eureka**\nSpring Cloud Netflix\n<b>:8761</b>" as EU #EFEFEF
 
-package "Serveurs applicatifs (microservices)" #DFF2F0 {
+package "Serveurs applicatifs (microservices)" as APP #DFF2F0 {
   rectangle "**SRV**\nSpring Boot\n<b>:8082</b>" as SRV
   rectangle "**marketplace**\nSpring Boot\n<b>:8083</b>" as MKT
   rectangle "**Delivery**\nSpring Boot\n<b>:8084</b>" as DEL
   rectangle "**event**\nSpring Boot\n<b>:8085</b>" as EVT
-  SRV -[hidden]down-> MKT
-  MKT -[hidden]down-> DEL
-  DEL -[hidden]down-> EVT
+  SRV -[hidden]right-> MKT
+  MKT -[hidden]right-> DEL
+  DEL -[hidden]right-> EVT
 }
 
-database "Serveur PostgreSQL" #FDEBD2 {
+package "Serveur PostgreSQL" as DBS #FDEBD2 {
   database "**awd-Delivery**" as AWDDB
   database "**awd-event**" as EVTDB
+  AWDDB -[hidden]right-> EVTDB
 }
 
-Client -down-> SRV : HTTP
-Client -down-> MKT : HTTP
-Client -down-> DEL : HTTP
-Client -down-> EVT : HTTP
+Client -[hidden]right-> EU
+
+Client -down-> APP : HTTP
 
 SRV .up.> EU : enregistrement
 MKT .up.> EU : enregistrement
 DEL .up.> EU : enregistrement
 EVT .up.> EU : enregistrement
 
-DEL -right-> AWDDB : JDBC
-EVT -right-> EVTDB : JDBC
+DEL -down-> AWDDB : JDBC
+EVT -down-> EVTDB : JDBC
 
 @enduml

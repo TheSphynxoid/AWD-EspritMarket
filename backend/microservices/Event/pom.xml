@@ -8,7 +8,7 @@
         <version>4.1.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>tn.esprit.spring</groupId>
+    <groupId>net.thesphynx</groupId>
     <artifactId>event</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>event</name>

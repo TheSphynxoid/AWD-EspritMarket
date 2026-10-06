@@ -1,4 +1,4 @@
-package tn.esprit.spring.event;
+package net.thesphynx.event;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

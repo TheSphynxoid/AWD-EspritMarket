@@ -41,7 +41,7 @@ Poste client, serveurs applicatifs avec leurs ports, serveur PostgreSQL et proto
 | SRV | `backend/microservices/SRV/` | 8082 | Microservice services/réservations, client Eureka |
 | marketplace | `backend/microservices/marketplace/` | 8083 | Microservice marketplace, client Eureka |
 | Delivery | `backend/microservices/Delivery/` | 8084 | Microservice livraison (JPA + PostgreSQL), client Eureka |
-| event | `backend/microservices/Event/event/` | 8085 | Microservice événementiel (JPA + PostgreSQL), client Eureka |
+| event | `backend/microservices/Event/` | 8085 | Microservice événementiel (JPA + PostgreSQL), client Eureka |
 
 ---
 
@@ -77,7 +77,7 @@ cd backend\microservices\Delivery
 .\mvnw.cmd spring-boot:run
 
 # Terminal 5 — event sur :8085
-cd backend\microservices\Event\event
+cd backend\microservices\Event
 .\mvnw.cmd spring-boot:run
 ```
 
