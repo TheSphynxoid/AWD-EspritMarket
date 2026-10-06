@@ -5,14 +5,17 @@ Structure basée sur les workshops **Applications Web Distribuées (AWD)**
 
 ---
 
-## Objectif du projet
+## Présentation du projet
 
-Reprendre l'idée d'**EspritMarket** (place de marché de services pour la communauté
-ESPRIT) et la reconstruire en **architecture microservices**, en suivant la structure
-des workshops AWD :
+**EspritMarket** est une place de marché de services dédiée à la communauté ESPRIT.
+Les étudiants peuvent y proposer, découvrir et réserver des services entre pairs :
 
-- Un serveur **Eureka** (discovery) comme registre de services
-- Des microservices **standalone** (Spring Boot + Maven wrapper par service)
+- **SRV** — offres de services : publication, réservation (booking), suivi des
+  réalisations et livraison des livrables ; c'est le module en cours de développement
+- **Marketplace, événementiel, partenariats** — autres domaines du projet
+
+L'ensemble est construit en **architecture microservices** : chaque domaine est un
+service Spring Boot indépendant, enregistré dans un registre **Eureka**.
 
 ---
 
