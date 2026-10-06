@@ -25,22 +25,28 @@ package "Serveurs applicatifs (microservices)" #DFF2F0 {
   rectangle "**SRV**\nSpring Boot\n<b>:8082</b>" as SRV
   rectangle "**marketplace**\nSpring Boot\n<b>:8083</b>" as MKT
   rectangle "**Delivery**\nSpring Boot\n<b>:8084</b>" as DEL
+  rectangle "**event**\nSpring Boot\n<b>:8085</b>" as EVT
   SRV -[hidden]down-> MKT
   MKT -[hidden]down-> DEL
+  DEL -[hidden]down-> EVT
 }
 
 database "Serveur PostgreSQL" #FDEBD2 {
   database "**awd-Delivery**" as AWDDB
+  database "**awd-event**" as EVTDB
 }
 
 Client -down-> SRV : HTTP
 Client -down-> MKT : HTTP
 Client -down-> DEL : HTTP
+Client -down-> EVT : HTTP
 
 SRV .up.> EU : enregistrement
 MKT .up.> EU : enregistrement
 DEL .up.> EU : enregistrement
+EVT .up.> EU : enregistrement
 
 DEL -right-> AWDDB : JDBC
+EVT -right-> EVTDB : JDBC
 
 @enduml

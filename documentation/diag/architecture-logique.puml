@@ -24,20 +24,25 @@ package "Microservices Spring Boot" #DFF2F0 {
   rectangle "**SRV**\noffres de services, réservations\n<b>port :8082</b>" as SRV
   rectangle "**marketplace**\nplace de marché\n<b>port :8083</b>" as MKT
   rectangle "**Delivery**\nlivraisons\n<b>port :8084</b>" as DEL
+  rectangle "**event**\névénementiel\n<b>port :8085</b>" as EVT
 }
 
 package "Serveur PostgreSQL" #FDEBD2 {
   database "**awd-Delivery**\nb :5432" as AWDDB
+  database "**awd-event**\nb :5432" as EVTDB
 }
 
 Client -down-> SRV : appel HTTP
 Client -down-> MKT : appel HTTP
 Client -down-> DEL : appel HTTP
+Client -down-> EVT : appel HTTP
 
 SRV .up.> EU : enregistrement
 MKT .up.> EU : enregistrement
 DEL .up.> EU : enregistrement
+EVT .up.> EU : enregistrement
 
 DEL -down-> AWDDB : JDBC
+EVT -down-> EVTDB : JDBC
 
 @enduml

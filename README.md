@@ -41,6 +41,7 @@ Poste client, serveurs applicatifs avec leurs ports, serveur PostgreSQL et proto
 | SRV | `backend/microservices/SRV/` | 8082 | Microservice services/réservations, client Eureka |
 | marketplace | `backend/microservices/marketplace/` | 8083 | Microservice marketplace, client Eureka |
 | Delivery | `backend/microservices/Delivery/` | 8084 | Microservice livraison (JPA + PostgreSQL), client Eureka |
+| event | `backend/microservices/Event/event/` | 8085 | Microservice événementiel (JPA + PostgreSQL), client Eureka |
 
 ---
 
@@ -74,7 +75,11 @@ cd backend\microservices\marketplace
 # Terminal 4 — Delivery sur :8084
 cd backend\microservices\Delivery
 .\mvnw.cmd spring-boot:run
+
+# Terminal 5 — event sur :8085
+cd backend\microservices\Event\event
+.\mvnw.cmd spring-boot:run
 ```
 
 Vérification : ouvrir <http://localhost:8761> → les services (`SRV`, `marketplace`,
-`Delivery`) doivent apparaître dans *Instances currently registered with Eureka*.
+`Delivery`, `event`) doivent apparaître dans *Instances currently registered with Eureka*.
