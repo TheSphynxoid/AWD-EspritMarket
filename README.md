@@ -42,6 +42,8 @@ Poste client, serveurs applicatifs avec leurs ports, serveur PostgreSQL et proto
 | marketplace | `backend/microservices/marketplace/` | 8083 | Microservice marketplace, client Eureka |
 | Delivery | `backend/microservices/Delivery/` | 8084 | Microservice livraison (JPA + PostgreSQL), client Eureka |
 | event | `backend/microservices/Event/` | 8085 | Microservice événementiel (JPA + PostgreSQL), client Eureka |
+| Patnership | `backend/microservices/Partnership/` | 8086 | Microservice partenariats (JPA + PostgreSQL), client Eureka |
+| gateway | `backend/gateway/` | 8088 | Point d'entrée unique — routage dynamique `lb://` via Eureka, CORS |
 
 ---
 
@@ -79,7 +81,20 @@ cd backend\microservices\Delivery
 # Terminal 5 — event sur :8085
 cd backend\microservices\Event
 .\mvnw.cmd spring-boot:run
+
+# Terminal 6 — Patnership sur :8086
+cd backend\microservices\Partnership
+.\mvnw.cmd spring-boot:run
+
+# Terminal 7 — API Gateway sur :8088
+cd backend\gateway
+.\mvnw.cmd spring-boot:run
 ```
 
-Vérification : ouvrir <http://localhost:8761> → les services (`SRV`, `marketplace`,
-`Delivery`, `event`) doivent apparaître dans *Instances currently registered with Eureka*.
+Vérification : ouvrir <http://localhost:8761> → `GATEWAY` et les services (`SRV`,
+`marketplace`, `Delivery`, `event`, `Patnership`) doivent apparaître dans
+*Instances currently registered with Eureka*.
+
+Le point d'entrée unique est la gateway sur <http://localhost:8088> :
+`/srv/**`, `/marketplace/**`, `/delivery/**`, `/event/**` et `/patnership/**`
+sont transformés en appels `lb://` vers les services (load balancing via Eureka).

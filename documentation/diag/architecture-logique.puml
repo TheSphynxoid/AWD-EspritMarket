@@ -16,6 +16,8 @@ skinparam rectangle {
 
 actor "Poste client\nNavigateur" as Client
 
+rectangle "**API Gateway**\nSpring Cloud Gateway\n<b>port :8088</b>" as GW #EFEFEF
+
 rectangle "**Eureka Server**\n(annuaire des services)\n<b>:8761</b>" as EU #EFEFEF
 
 package "Microservices Spring Boot" as MS #DFF2F0 {
@@ -23,27 +25,37 @@ package "Microservices Spring Boot" as MS #DFF2F0 {
   rectangle "**marketplace**\nplace de marché\n<b>port :8083</b>" as MKT
   rectangle "**Delivery**\nlivraisons\n<b>port :8084</b>" as DEL
   rectangle "**event**\névénementiel\n<b>port :8085</b>" as EVT
+  rectangle "**Patnership**\npartenariats\n<b>port :8086</b>" as PTN
   SRV -[hidden]right-> MKT
   MKT -[hidden]right-> DEL
   DEL -[hidden]right-> EVT
+  EVT -[hidden]right-> PTN
 }
 
 package "Serveur PostgreSQL" as DBS #FDEBD2 {
   database "**awd-Delivery**\n<b>:5432</b>" as AWDDB
   database "**awd-event**\n<b>:5432</b>" as EVTDB
+  database "**awd-Partnership**\n<b>:5432</b>" as PTNDB
   AWDDB -[hidden]right-> EVTDB
+  EVTDB -[hidden]right-> PTNDB
 }
 
 Client -[hidden]right-> EU
 
-Client -down-> MS : appel HTTP
+Client -down-> GW : appel HTTP
+
+GW -down-> MS : appel REST
+
+GW .up.> EU : enregistrement
 
 SRV .up.> EU : enregistrement
 MKT .up.> EU : enregistrement
 DEL .up.> EU : enregistrement
 EVT .up.> EU : enregistrement
+PTN .up.> EU : enregistrement
 
 DEL -down-> AWDDB : JDBC
 EVT -down-> EVTDB : JDBC
+PTN -down-> PTNDB : JDBC
 
 @enduml

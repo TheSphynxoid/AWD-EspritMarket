@@ -1,15 +1,15 @@
-package tn.esprit.patnership;
+package net.thesphynx.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
-@EnableDiscoveryClient
 @SpringBootApplication
-public class PatnershipApplication {
+@EnableDiscoveryClient
+public class GatewayApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(PatnershipApplication.class, args);
+        SpringApplication.run(GatewayApplication.class, args);
     }
 
 }
