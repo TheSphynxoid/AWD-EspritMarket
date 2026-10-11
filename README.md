@@ -61,6 +61,10 @@ Poste client, serveurs applicatifs avec leurs ports, serveur PostgreSQL et proto
 
 **Ordre important :** toujours démarrer le serveur Eureka avant les microservices.
 
+Prérequis local : PostgreSQL sur `localhost:5432` (utilisateur `postgres`,
+mot de passe surchargé par `SPRING_DATASOURCE_PASSWORD` — par défaut `admin`),
+avec les bases par service : `awd-Delivery`, `awd-event`, `awd-Partnership`.
+
 ```powershell
 # Terminal 1 — Eureka Server sur :8761
 cd backend/discovery
