@@ -1,64 +1,134 @@
 {
   "info": {
-    "_postman_id": "marketplace-product-crud",
-    "name": "Marketplace - Product CRUD",
+    "_postman_id": "marketplace-crud",
+    "name": "Marketplace CRUD",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8083"
-    },
-    {
-      "key": "productId",
-      "value": "1"
-    }
+    { "key": "baseUrl", "value": "http://localhost:8083" },
+    { "key": "categoryId", "value": "" },
+    { "key": "shopId", "value": "" },
+    { "key": "productId", "value": "" }
   ],
   "item": [
     {
-      "name": "Create product",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"name\": \"Laptop Lenovo\",\n  \"description\": \"Laptop professionnel\",\n  \"price\": 2499.99,\n  \"stock\": 10,\n  \"category\": \"Informatique\",\n  \"color\": \"Gris\"\n}"
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Create category",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Informatique\"\n}" },
+            "url": "{{baseUrl}}/mic2/categories"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Statut 201', function () { pm.response.to.have.status(201); });",
+            "pm.collectionVariables.set('categoryId', pm.response.json().id);"
+          ] } }]
         },
-        "url": "{{baseUrl}}/api/products"
-      }
+        {
+          "name": "List categories",
+          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/categories" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+        }
+      ]
     },
     {
-      "name": "List products",
-      "request": {
-        "method": "GET",
-        "url": "{{baseUrl}}/api/products"
-      }
-    },
-    {
-      "name": "Get product by id",
-      "request": {
-        "method": "GET",
-        "url": "{{baseUrl}}/api/products/{{productId}}"
-      }
-    },
-    {
-      "name": "Update product",
-      "request": {
-        "method": "PUT",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"name\": \"Laptop Lenovo Updated\",\n  \"description\": \"Laptop professionnel mis a jour\",\n  \"price\": 2299.99,\n  \"stock\": 8,\n  \"category\": \"Informatique\",\n  \"color\": \"Noir\"\n}"
+      "name": "Shops",
+      "item": [
+        {
+          "name": "Create shop",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ma boutique\",\n  \"description\": \"Boutique de produits tech\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"ownerId\": 1\n}" },
+            "url": "{{baseUrl}}/mic2/shops"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Statut 201', function () { pm.response.to.have.status(201); });",
+            "pm.collectionVariables.set('shopId', pm.response.json().id);"
+          ] } }]
         },
-        "url": "{{baseUrl}}/api/products/{{productId}}"
-      }
+        {
+          "name": "Activate shop",
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/shops/{{shopId}}/status?status=ACTIVE" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "List shops",
+          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/shops" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "Get shop by id",
+          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/shops/{{shopId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "Update shop",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ma boutique mise a jour\",\n  \"description\": \"Nouvelle description\",\n  \"logoUrl\": \"https://example.com/new-logo.png\",\n  \"ownerId\": 1\n}" },
+            "url": "{{baseUrl}}/mic2/shops/{{shopId}}"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "Delete shop",
+          "request": { "method": "DELETE", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/shops/{{shopId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 204', function () { pm.response.to.have.status(204); });"] } }]
+        }
+      ]
     },
     {
-      "name": "Delete product",
-      "request": {
-        "method": "DELETE",
-        "url": "{{baseUrl}}/api/products/{{productId}}"
-      }
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create product",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Laptop Lenovo\",\n  \"description\": \"Laptop professionnel\",\n  \"price\": 2499.99,\n  \"stock\": 10,\n  \"imageUrl\": \"https://example.com/laptop.png\",\n  \"categoryId\": {{categoryId}}\n}" },
+            "url": "{{baseUrl}}/mic2/shops/{{shopId}}/products"
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Statut 201', function () { pm.response.to.have.status(201); });",
+            "pm.collectionVariables.set('productId', pm.response.json().id);"
+          ] } }]
+        },
+        {
+          "name": "List products by shop",
+          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/shops/{{shopId}}/products" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "List all products",
+          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/products" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "Get product by id",
+          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/products/{{productId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "Update product",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Laptop Lenovo Updated\",\n  \"description\": \"Laptop professionnel mis a jour\",\n  \"price\": 2299.99,\n  \"stock\": 8,\n  \"imageUrl\": \"https://example.com/laptop-updated.png\",\n  \"categoryId\": {{categoryId}}\n}" },
+            "url": "{{baseUrl}}/mic2/products/{{productId}}"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "Delete product",
+          "request": { "method": "DELETE", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/products/{{productId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 204', function () { pm.response.to.have.status(204); });"] } }]
+        }
+      ]
     }
   ]
 }

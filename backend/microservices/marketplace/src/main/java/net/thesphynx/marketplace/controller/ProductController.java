@@ -2,63 +2,56 @@ package net.thesphynx.marketplace.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import net.thesphynx.marketplace.dto.ProductRequestDto;
-import net.thesphynx.marketplace.dto.ProductResponseDto;
-import net.thesphynx.marketplace.exception.ProductNotFoundException;
+import net.thesphynx.marketplace.dto.ProductRequest;
+import net.thesphynx.marketplace.dto.ProductResponse;
 import net.thesphynx.marketplace.service.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/products")
 public class ProductController {
 
-    private final ProductService productService;
+    private final ProductService service;
 
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    public ProductController(ProductService service) {
+        this.service = service;
     }
 
-    @PostMapping
-    public ResponseEntity<ProductResponseDto> create(@Valid @RequestBody ProductRequestDto request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(request));
+    @PostMapping("/mic2/shops/{shopId}/products")
+    public ResponseEntity<ProductResponse> create(
+            @PathVariable Long shopId,
+            @Valid @RequestBody ProductRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(service.create(shopId, request));
     }
 
-    @GetMapping
-    public List<ProductResponseDto> findAll() {
-        return productService.findAll();
+    @GetMapping("/mic2/shops/{shopId}/products")
+    public List<ProductResponse> findByShop(@PathVariable Long shopId) {
+        return service.findByShop(shopId);
     }
 
-    @GetMapping("/{id}")
-    public ProductResponseDto findById(@PathVariable Long id) {
-        return productService.findById(id);
+    @GetMapping("/mic2/products")
+    public List<ProductResponse> findAll() {
+        return service.findAll();
     }
 
-    @PutMapping("/{id}")
-    public ProductResponseDto update(@PathVariable Long id, @Valid @RequestBody ProductRequestDto request) {
-        return productService.update(id, request);
+    @GetMapping("/mic2/products/{id}")
+    public ProductResponse findById(@PathVariable Long id) {
+        return service.findById(id);
     }
 
-    @DeleteMapping("/{id}")
+    @PutMapping("/mic2/products/{id}")
+    public ProductResponse update(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductRequest request) {
+        return service.update(id, request);
+    }
+
+    @DeleteMapping("/mic2/products/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        productService.delete(id);
+        service.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(ProductNotFoundException exception) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(exception.getMessage()));
-    }
-
-    public record ErrorResponse(String message) {
     }
 }
