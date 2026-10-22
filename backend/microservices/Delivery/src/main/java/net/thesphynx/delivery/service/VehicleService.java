@@ -1,5 +1,6 @@
 package net.thesphynx.delivery.service;
 
+import net.thesphynx.delivery.dto.VehicleDto;
 import net.thesphynx.delivery.entity.Deliverer;
 import net.thesphynx.delivery.entity.Vehicle;
 import net.thesphynx.delivery.repository.DelivererRepository;
@@ -22,38 +23,30 @@ public class VehicleService {
         this.delivererRepository = delivererRepository;
     }
 
-    public List<Vehicle> findAll() {
-        return vehicleRepository.findAll();
+    public List<VehicleDto> findAll() {
+        return vehicleRepository.findAll().stream().map(this::toDto).toList();
     }
 
-    public Vehicle findById(Long id) {
-        return getVehicle(id);
+    public VehicleDto findById(Long id) {
+        return toDto(getVehicle(id));
     }
 
-    public Vehicle create(Vehicle vehicle) {
-        if (vehicleRepository.existsByRegistrationNumber(vehicle.getRegistrationNumber())) {
+    public VehicleDto create(VehicleDto dto) {
+        if (vehicleRepository.existsByRegistrationNumber(dto.getRegistrationNumber())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Immatriculation déjà utilisée : " + vehicle.getRegistrationNumber());
+                    "Immatriculation déjà utilisée : " + dto.getRegistrationNumber());
         }
-        vehicle.setId(null);
-        if (vehicle.getAvailable() == null) {
-            vehicle.setAvailable(true);
-        }
-        return vehicleRepository.save(vehicle);
+        return toDto(vehicleRepository.save(toEntity(dto)));
     }
 
-    public Vehicle update(Long id, Vehicle data) {
+    public VehicleDto update(Long id, VehicleDto dto) {
         Vehicle vehicle = getVehicle(id);
-        if (vehicleRepository.existsByRegistrationNumberAndIdNot(data.getRegistrationNumber(), id)) {
+        if (vehicleRepository.existsByRegistrationNumberAndIdNot(dto.getRegistrationNumber(), id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Immatriculation déjà utilisée : " + data.getRegistrationNumber());
+                    "Immatriculation déjà utilisée : " + dto.getRegistrationNumber());
         }
-        vehicle.setType(data.getType());
-        vehicle.setRegistrationNumber(data.getRegistrationNumber());
-        if (data.getAvailable() != null) {
-            vehicle.setAvailable(data.getAvailable());
-        }
-        return vehicleRepository.save(vehicle);
+        updateEntity(vehicle, dto);
+        return toDto(vehicleRepository.save(vehicle));
     }
 
     @Transactional
@@ -70,5 +63,24 @@ public class VehicleService {
         return vehicleRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Véhicule introuvable : " + id));
+    }
+
+    private Vehicle toEntity(VehicleDto dto) {
+        Vehicle vehicle = new Vehicle();
+        updateEntity(vehicle, dto);
+        return vehicle;
+    }
+
+    private void updateEntity(Vehicle vehicle, VehicleDto dto) {
+        vehicle.setType(dto.getType());
+        vehicle.setRegistrationNumber(dto.getRegistrationNumber());
+        if (dto.getAvailable() != null) {
+            vehicle.setAvailable(dto.getAvailable());
+        }
+    }
+
+    private VehicleDto toDto(Vehicle vehicle) {
+        return new VehicleDto(vehicle.getId(), vehicle.getType(), vehicle.getRegistrationNumber(),
+                vehicle.getAvailable());
     }
 }

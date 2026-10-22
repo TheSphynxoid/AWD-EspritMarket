@@ -1,9 +1,8 @@
 package net.thesphynx.delivery.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import net.thesphynx.delivery.entity.Delivery;
-import net.thesphynx.delivery.enums.DeliveryStatus;
+import net.thesphynx.delivery.dto.DeliveryDto;
+import net.thesphynx.delivery.dto.DeliveryStatusDto;
 import net.thesphynx.delivery.service.DeliveryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,38 +20,34 @@ public class DeliveryController {
         this.deliveryService = deliveryService;
     }
 
-    /** Corps de PATCH /{id}/status : {"status": "IN_PROGRESS"}. */
-    public record StatusRequest(@NotNull(message = "Le statut est obligatoire") DeliveryStatus status) {
-    }
-
     @GetMapping
-    public List<Delivery> findAll() {
+    public List<DeliveryDto> findAll() {
         return deliveryService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Delivery findById(@PathVariable Long id) {
+    public DeliveryDto findById(@PathVariable Long id) {
         return deliveryService.findById(id);
     }
 
     @PostMapping
-    public ResponseEntity<Delivery> create(@Valid @RequestBody Delivery delivery) {
-        Delivery created = deliveryService.create(delivery);
+    public ResponseEntity<DeliveryDto> create(@Valid @RequestBody DeliveryDto dto) {
+        DeliveryDto created = deliveryService.create(dto);
         return ResponseEntity.created(URI.create("/api/deliveries/" + created.getId())).body(created);
     }
 
     @PutMapping("/{id}")
-    public Delivery update(@PathVariable Long id, @Valid @RequestBody Delivery delivery) {
-        return deliveryService.update(id, delivery);
+    public DeliveryDto update(@PathVariable Long id, @Valid @RequestBody DeliveryDto dto) {
+        return deliveryService.update(id, dto);
     }
 
     @PatchMapping("/{id}/status")
-    public Delivery updateStatus(@PathVariable Long id, @Valid @RequestBody StatusRequest request) {
-        return deliveryService.updateStatus(id, request.status());
+    public DeliveryDto updateStatus(@PathVariable Long id, @Valid @RequestBody DeliveryStatusDto dto) {
+        return deliveryService.updateStatus(id, dto.getStatus());
     }
 
     @PutMapping("/{id}/deliverer/{delivererId}")
-    public Delivery assignDeliverer(@PathVariable Long id, @PathVariable Long delivererId) {
+    public DeliveryDto assignDeliverer(@PathVariable Long id, @PathVariable Long delivererId) {
         return deliveryService.assignDeliverer(id, delivererId);
     }
 

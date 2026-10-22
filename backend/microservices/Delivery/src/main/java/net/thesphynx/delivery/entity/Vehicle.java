@@ -1,8 +1,6 @@
 package net.thesphynx.delivery.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import net.thesphynx.delivery.enums.VehicleType;
 
 @Entity
@@ -13,12 +11,10 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Le type du véhicule est obligatoire")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private VehicleType type;
 
-    @NotBlank(message = "Le numéro d'immatriculation est obligatoire")
     @Column(name = "registration_number", nullable = false, unique = true)
     private String registrationNumber;
 

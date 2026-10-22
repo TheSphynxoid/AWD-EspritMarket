@@ -1,5 +1,6 @@
 package net.thesphynx.delivery.service;
 
+import net.thesphynx.delivery.dto.DelivererDto;
 import net.thesphynx.delivery.entity.Deliverer;
 import net.thesphynx.delivery.entity.Delivery;
 import net.thesphynx.delivery.entity.Vehicle;
@@ -26,32 +27,24 @@ public class DelivererService {
         this.vehicleService = vehicleService;
     }
 
-    public List<Deliverer> findAll() {
-        return delivererRepository.findAll();
+    public List<DelivererDto> findAll() {
+        return delivererRepository.findAll().stream().map(this::toDto).toList();
     }
 
-    public Deliverer findById(Long id) {
-        return getDeliverer(id);
+    public DelivererDto findById(Long id) {
+        return toDto(getDeliverer(id));
     }
 
-    public Deliverer create(Deliverer data) {
+    public DelivererDto create(DelivererDto dto) {
         Deliverer deliverer = new Deliverer();
-        deliverer.setFullName(data.getFullName());
-        deliverer.setPhone(data.getPhone());
-        deliverer.setAvailable(data.getAvailable() != null ? data.getAvailable() : true);
-        deliverer.setVehicle(resolveVehicle(data.getVehicle(), null));
-        return delivererRepository.save(deliverer);
+        updateEntity(deliverer, dto);
+        return toDto(delivererRepository.save(deliverer));
     }
 
-    public Deliverer update(Long id, Deliverer data) {
+    public DelivererDto update(Long id, DelivererDto dto) {
         Deliverer deliverer = getDeliverer(id);
-        deliverer.setFullName(data.getFullName());
-        deliverer.setPhone(data.getPhone());
-        if (data.getAvailable() != null) {
-            deliverer.setAvailable(data.getAvailable());
-        }
-        deliverer.setVehicle(resolveVehicle(data.getVehicle(), id));
-        return delivererRepository.save(deliverer);
+        updateEntity(deliverer, dto);
+        return toDto(delivererRepository.save(deliverer));
     }
 
     @Transactional
@@ -70,18 +63,33 @@ public class DelivererService {
                         HttpStatus.NOT_FOUND, "Livreur introuvable : " + id));
     }
 
-    /** Charge le véhicule demandé ({"id": ...}) et vérifie qu'il n'est pas déjà associé à un autre livreur. */
-    private Vehicle resolveVehicle(Vehicle requested, Long delivererId) {
-        if (requested == null || requested.getId() == null) {
+    private void updateEntity(Deliverer deliverer, DelivererDto dto) {
+        deliverer.setFullName(dto.getFullName());
+        deliverer.setPhone(dto.getPhone());
+        if (dto.getAvailable() != null) {
+            deliverer.setAvailable(dto.getAvailable());
+        }
+        deliverer.setVehicle(resolveVehicle(dto.getVehicleId(), deliverer.getId()));
+    }
+
+    /** Charge le véhicule demandé et vérifie qu'il n'est pas déjà associé à un autre livreur. */
+    private Vehicle resolveVehicle(Long vehicleId, Long delivererId) {
+        if (vehicleId == null) {
             return null;
         }
-        Vehicle vehicle = vehicleService.getVehicle(requested.getId());
-        boolean usedByOther = delivererRepository.findByVehicleId(vehicle.getId()).stream()
+        Vehicle vehicle = vehicleService.getVehicle(vehicleId);
+        boolean usedByOther = delivererRepository.findByVehicleId(vehicleId).stream()
                 .anyMatch(d -> !d.getId().equals(delivererId));
         if (usedByOther) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Véhicule déjà associé à un autre livreur : " + vehicle.getId());
+                    "Véhicule déjà associé à un autre livreur : " + vehicleId);
         }
         return vehicle;
+    }
+
+    private DelivererDto toDto(Deliverer deliverer) {
+        return new DelivererDto(deliverer.getId(), deliverer.getFullName(), deliverer.getPhone(),
+                deliverer.getAvailable(),
+                deliverer.getVehicle() != null ? deliverer.getVehicle().getId() : null);
     }
 }
