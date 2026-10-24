@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
+import { adminDeliveryGuard, authGuard } from './core/guards/auth.guard';
 import { LoginComponent } from './features/auth/login/login';
 import { RegisterComponent } from './features/auth/register/register';
 import { ProfileComponent } from './features/profile/profile';
@@ -15,4 +15,14 @@ export const routes: Routes = [
   { path: 'services', component: ServiceListComponent },
   { path: 'services/new', component: ServiceNewComponent, canActivate: [authGuard] },
   { path: 'services/:id', component: ServiceDetailComponent },
+  {
+    path: 'delivery',
+    loadChildren: () => import('./features/delivery/delivery.routes').then((m) => m.DELIVERY_ROUTES),
+  },
+  {
+    path: 'admin/delivery',
+    canActivate: [adminDeliveryGuard],
+    loadChildren: () =>
+      import('./features/admin-delivery/admin-delivery.routes').then((m) => m.ADMIN_DELIVERY_ROUTES),
+  },
 ];

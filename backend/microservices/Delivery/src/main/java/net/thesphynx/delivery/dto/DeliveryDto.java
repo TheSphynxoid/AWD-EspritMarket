@@ -3,7 +3,6 @@ package net.thesphynx.delivery.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.PositiveOrZero;
 import net.thesphynx.delivery.enums.DeliveryStatus;
 import net.thesphynx.delivery.enums.DeliveryType;
 
@@ -30,8 +29,7 @@ public class DeliveryDto {
     @Pattern(regexp = "^\\+?[0-9]{8,15}$", message = "Numéro de téléphone invalide")
     private String phone;
 
-    @NotNull(message = "Les frais de livraison sont obligatoires")
-    @PositiveOrZero(message = "Les frais de livraison doivent être positifs ou nuls")
+    /** En lecture seule : tarif fixé par l'admin selon le type (voir DeliveryFeeService). */
     private Double deliveryFee;
 
     @NotNull(message = "Le type de livraison est obligatoire")

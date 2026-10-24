@@ -10,7 +10,11 @@ import { AuthService } from '../../../core/services/auth.service';
       <a routerLink="/" class="text-xl font-bold">EspritMarket</a>
       <div class="flex gap-4 items-center">
         <a routerLink="/services" routerLinkActive="underline" class="hover:text-slate-300">Services</a>
+        <a routerLink="/delivery" routerLinkActive="underline" class="hover:text-slate-300">Livraisons</a>
         @if (auth.isAuthenticated()) {
+          @if (auth.hasRole('ADMIN_DELIVERY')) {
+            <a routerLink="/admin/delivery" routerLinkActive="underline" class="hover:text-slate-300">Admin livraison</a>
+          }
           <a routerLink="/profile" class="hover:text-slate-300">Profile</a>
           <button (click)="auth.logout()" class="bg-slate-700 px-3 py-1 rounded hover:bg-slate-600">Logout</button>
         } @else {

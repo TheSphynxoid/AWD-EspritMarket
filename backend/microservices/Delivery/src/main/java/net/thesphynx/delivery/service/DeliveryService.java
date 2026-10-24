@@ -23,13 +23,16 @@ public class DeliveryService {
     private final DelivererRepository delivererRepository;
     private final DelivererService delivererService;
     private final MarketplaceClient marketplaceClient;
+    private final DeliveryFeeService deliveryFeeService;
 
     public DeliveryService(DeliveryRepository deliveryRepository, DelivererRepository delivererRepository,
-                           DelivererService delivererService, MarketplaceClient marketplaceClient) {
+                           DelivererService delivererService, MarketplaceClient marketplaceClient,
+                           DeliveryFeeService deliveryFeeService) {
         this.deliveryRepository = deliveryRepository;
         this.delivererRepository = delivererRepository;
         this.delivererService = delivererService;
         this.marketplaceClient = marketplaceClient;
+        this.deliveryFeeService = deliveryFeeService;
     }
 
     public List<DeliveryDto> findAll() {
@@ -42,8 +45,10 @@ public class DeliveryService {
 
     public DeliveryDto create(DeliveryDto dto) {
         ensureProductAvailable(dto.getProductId());
+        Delivery delivery = toEntity(dto);
+        delivery.setDeliveryFee(deliveryFeeService.getAmount(delivery.getDeliveryType()));
         // status = PENDING et createdAt générés dans @PrePersist
-        return toDto(deliveryRepository.save(toEntity(dto)));
+        return toDto(deliveryRepository.save(delivery));
     }
 
     public DeliveryDto update(Long id, DeliveryDto dto) {
@@ -51,6 +56,10 @@ public class DeliveryService {
         ensureNotClosed(delivery);
         if (!dto.getProductId().equals(delivery.getProductId())) {
             ensureProductAvailable(dto.getProductId());
+        }
+        // Le tarif n'est recalculé que si le type de livraison change.
+        if (dto.getDeliveryType() != delivery.getDeliveryType()) {
+            delivery.setDeliveryFee(deliveryFeeService.getAmount(dto.getDeliveryType()));
         }
         updateEntity(delivery, dto);
         return toDto(deliveryRepository.save(delivery));
@@ -129,14 +138,13 @@ public class DeliveryService {
         return delivery;
     }
 
-    /** status, createdAt et delivererId ne sont jamais pris depuis le DTO. */
+    /** status, createdAt, delivererId et deliveryFee ne sont jamais pris depuis le DTO. */
     private void updateEntity(Delivery delivery, DeliveryDto dto) {
         delivery.setRecipientName(dto.getRecipientName());
         delivery.setAddress(dto.getAddress());
         delivery.setCity(dto.getCity());
         delivery.setPostalCode(dto.getPostalCode());
         delivery.setPhone(dto.getPhone());
-        delivery.setDeliveryFee(dto.getDeliveryFee());
         delivery.setDeliveryType(dto.getDeliveryType());
         delivery.setProductId(dto.getProductId());
     }
