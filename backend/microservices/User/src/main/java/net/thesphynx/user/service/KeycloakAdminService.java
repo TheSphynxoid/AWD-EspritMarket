@@ -14,7 +14,7 @@ public class KeycloakAdminService {
 
     private final RestClient restClient;
 
-    @Value("${keycloak.auth-server-url:http://localhost:8080}")
+    @Value("${keycloak.auth-server-url:http://localhost:8180}")
     private String serverUrl;
 
     @Value("${keycloak.realm:espritmarket}")
@@ -36,7 +36,11 @@ public class KeycloakAdminService {
         Map<String, Object> user = Map.of(
             "username", username,
             "email", email,
+            "firstName", username,
+            "lastName", "User",
             "enabled", true,
+            "emailVerified", true,
+            "requiredActions", List.of(),
             "credentials", List.of(Map.of(
                 "type", "password",
                 "value", password,
