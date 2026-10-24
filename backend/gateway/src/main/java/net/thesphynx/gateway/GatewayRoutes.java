@@ -56,6 +56,12 @@ public class GatewayRoutes {
                 .route("patnership", r -> r.path("/patnership/**")
                         .uri("lb://PATNERSHIP"))
 
+                .route("user", r -> r.path("/user/**")
+                        .uri("lb://USER"))
+
+                .route("notification", r -> r.path("/notification/**")
+                        .uri("lb://NOTIFICATION"))
+
                 .build();
     }
 }

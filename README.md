@@ -43,6 +43,8 @@ Poste client, serveurs applicatifs avec leurs ports, serveur PostgreSQL et proto
 | Delivery | `backend/microservices/Delivery/` | 8084 | Microservice livraison (JPA + PostgreSQL), client Eureka |
 | event | `backend/microservices/Event/` | 8085 | Microservice événementiel (JPA + PostgreSQL), client Eureka |
 | Patnership | `backend/microservices/Partnership/` | 8086 | Microservice partenariats (JPA + PostgreSQL), client Eureka |
+| User | `backend/microservices/User/` | 8087 | Microservice utilisateurs securise par Keycloak (OAuth2/JWT), client Eureka |
+| Notification | `backend/microservices/Notification/` | 8090 | Microservice notifications (Python/FastAPI), integration Eureka, consommateur RabbitMQ (envoi email/SMTP ou log) |
 | gateway | `backend/gateway/` | 8088 | Point d'entrée unique — routage dynamique `lb://` via Eureka, CORS |
 
 ---
@@ -90,7 +92,16 @@ cd backend\microservices\Event
 cd backend\microservices\Partnership
 .\mvnw.cmd spring-boot:run
 
-# Terminal 7 — API Gateway sur :8088
+# Terminal 7 — User sur :8087 (Keycloak requis sur :8080)
+cd backend\microservices\User
+.\mvnw.cmd spring-boot:run
+
+# Terminal 8 — Notification (Python) sur :8090
+cd backend\microservices\Notification
+pip install -r requirements.txt
+python app.py
+
+# Terminal 9 — API Gateway sur :8088
 cd backend\gateway
 .\mvnw.cmd spring-boot:run
 ```
