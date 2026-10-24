@@ -11,6 +11,14 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
+  register(username: string, email: string, password: string): Observable<any> {
+    return this.http.post('http://localhost:8088/user/register', {
+      username,
+      email,
+      password,
+    });
+  }
+
   get token(): string | null {
     if (typeof localStorage === 'undefined') return null;
     return localStorage.getItem(this.tokenKey);
