@@ -36,6 +36,10 @@ public class Delivery {
     @Column(name = "delivery_type", nullable = false)
     private DeliveryType deliveryType;
 
+    /** Produit livré : référence vers le microservice marketplace (vérifié par appel synchrone). */
+    @Column(name = "product_id")
+    private Long productId;
+
     /** Géré par le service (PENDING à la création, puis PATCH /status). */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -94,6 +98,9 @@ public class Delivery {
 
     public DeliveryType getDeliveryType() { return deliveryType; }
     public void setDeliveryType(DeliveryType deliveryType) { this.deliveryType = deliveryType; }
+
+    public Long getProductId() { return productId; }
+    public void setProductId(Long productId) { this.productId = productId; }
 
     public DeliveryStatus getStatus() { return status; }
     public void setStatus(DeliveryStatus status) { this.status = status; }

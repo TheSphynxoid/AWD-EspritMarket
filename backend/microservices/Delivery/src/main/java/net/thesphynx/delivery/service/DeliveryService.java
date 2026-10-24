@@ -1,6 +1,9 @@
 package net.thesphynx.delivery.service;
 
+import feign.FeignException;
+import net.thesphynx.delivery.client.MarketplaceClient;
 import net.thesphynx.delivery.dto.DeliveryDto;
+import net.thesphynx.delivery.dto.ProductDto;
 import net.thesphynx.delivery.entity.Deliverer;
 import net.thesphynx.delivery.entity.Delivery;
 import net.thesphynx.delivery.enums.DeliveryStatus;
@@ -19,12 +22,14 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final DelivererRepository delivererRepository;
     private final DelivererService delivererService;
+    private final MarketplaceClient marketplaceClient;
 
     public DeliveryService(DeliveryRepository deliveryRepository, DelivererRepository delivererRepository,
-                           DelivererService delivererService) {
+                           DelivererService delivererService, MarketplaceClient marketplaceClient) {
         this.deliveryRepository = deliveryRepository;
         this.delivererRepository = delivererRepository;
         this.delivererService = delivererService;
+        this.marketplaceClient = marketplaceClient;
     }
 
     public List<DeliveryDto> findAll() {
@@ -36,6 +41,7 @@ public class DeliveryService {
     }
 
     public DeliveryDto create(DeliveryDto dto) {
+        ensureProductAvailable(dto.getProductId());
         // status = PENDING et createdAt générés dans @PrePersist
         return toDto(deliveryRepository.save(toEntity(dto)));
     }
@@ -43,6 +49,9 @@ public class DeliveryService {
     public DeliveryDto update(Long id, DeliveryDto dto) {
         Delivery delivery = getDelivery(id);
         ensureNotClosed(delivery);
+        if (!dto.getProductId().equals(delivery.getProductId())) {
+            ensureProductAvailable(dto.getProductId());
+        }
         updateEntity(delivery, dto);
         return toDto(deliveryRepository.save(delivery));
     }
@@ -98,6 +107,22 @@ public class DeliveryService {
                         HttpStatus.NOT_FOUND, "Livraison introuvable : " + id));
     }
 
+    /** Appel synchrone vers marketplace : le produit doit exister, être actif et en stock. */
+    private void ensureProductAvailable(Long productId) {
+        ProductDto product;
+        try {
+            product = marketplaceClient.getProduct(productId);
+        } catch (FeignException.NotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit introuvable : " + productId);
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Microservice marketplace indisponible");
+        }
+        if (!Boolean.TRUE.equals(product.active()) || product.stock() == null || product.stock() <= 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Produit indisponible : " + productId);
+        }
+    }
+
     private Delivery toEntity(DeliveryDto dto) {
         Delivery delivery = new Delivery();
         updateEntity(delivery, dto);
@@ -113,12 +138,13 @@ public class DeliveryService {
         delivery.setPhone(dto.getPhone());
         delivery.setDeliveryFee(dto.getDeliveryFee());
         delivery.setDeliveryType(dto.getDeliveryType());
+        delivery.setProductId(dto.getProductId());
     }
 
     private DeliveryDto toDto(Delivery delivery) {
         return new DeliveryDto(delivery.getId(), delivery.getRecipientName(), delivery.getAddress(),
                 delivery.getCity(), delivery.getPostalCode(), delivery.getPhone(), delivery.getDeliveryFee(),
-                delivery.getDeliveryType(), delivery.getStatus(), delivery.getCreatedAt(),
+                delivery.getDeliveryType(), delivery.getProductId(), delivery.getStatus(), delivery.getCreatedAt(),
                 delivery.getDeliverer() != null ? delivery.getDeliverer().getId() : null);
     }
 

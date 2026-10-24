@@ -37,6 +37,10 @@ public class DeliveryDto {
     @NotNull(message = "Le type de livraison est obligatoire")
     private DeliveryType deliveryType;
 
+    /** Produit de la marketplace : son existence est vérifiée auprès du microservice marketplace. */
+    @NotNull(message = "Le produit est obligatoire")
+    private Long productId;
+
     /** En lecture seule : géré par le service (PENDING à la création, puis PATCH /status). */
     private DeliveryStatus status;
 
@@ -50,8 +54,8 @@ public class DeliveryDto {
     }
 
     public DeliveryDto(Long id, String recipientName, String address, String city, String postalCode,
-                       String phone, Double deliveryFee, DeliveryType deliveryType, DeliveryStatus status,
-                       LocalDateTime createdAt, Long delivererId) {
+                       String phone, Double deliveryFee, DeliveryType deliveryType, Long productId,
+                       DeliveryStatus status, LocalDateTime createdAt, Long delivererId) {
         this.id = id;
         this.recipientName = recipientName;
         this.address = address;
@@ -60,6 +64,7 @@ public class DeliveryDto {
         this.phone = phone;
         this.deliveryFee = deliveryFee;
         this.deliveryType = deliveryType;
+        this.productId = productId;
         this.status = status;
         this.createdAt = createdAt;
         this.delivererId = delivererId;
@@ -88,6 +93,9 @@ public class DeliveryDto {
 
     public DeliveryType getDeliveryType() { return deliveryType; }
     public void setDeliveryType(DeliveryType deliveryType) { this.deliveryType = deliveryType; }
+
+    public Long getProductId() { return productId; }
+    public void setProductId(Long productId) { this.productId = productId; }
 
     public DeliveryStatus getStatus() { return status; }
     public void setStatus(DeliveryStatus status) { this.status = status; }
