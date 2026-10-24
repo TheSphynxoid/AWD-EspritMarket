@@ -24,6 +24,17 @@ export class AuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
+  get userId(): string | null {
+    const t = this.token;
+    if (!t) return null;
+    try {
+      const payload = JSON.parse(atob(t.split('.')[1]));
+      return payload.sub ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   login(username: string, password: string): Observable<any> {
     const body = new URLSearchParams();
     body.set('grant_type', 'password');

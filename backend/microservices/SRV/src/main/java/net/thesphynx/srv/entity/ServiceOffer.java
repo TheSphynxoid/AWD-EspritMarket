@@ -32,7 +32,7 @@ public class ServiceOffer {
 
     private String status;
 
-    private Long providerId;
+    private String providerId;
 
     private LocalDateTime createdAt;
 

@@ -10,7 +10,7 @@ export interface ServiceOffer {
   category?: string;
   price?: number;
   status?: string;
-  providerId?: number;
+  providerId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -35,5 +35,9 @@ export class ServiceOfferService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(this.api.url(`/srv/${id}`));
+  }
+
+  book(serviceId: number, bookerId: string): Observable<any> {
+    return this.http.post(this.api.url(`/srv/bookings?serviceId=${serviceId}&bookerId=${encodeURIComponent(bookerId)}`), {});
   }
 }
