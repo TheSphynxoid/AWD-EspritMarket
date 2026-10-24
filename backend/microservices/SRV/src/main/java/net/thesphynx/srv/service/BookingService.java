@@ -48,11 +48,11 @@ public class BookingService {
         return saved;
     }
 
-    public List<Booking> findByBooker(Long bookerId) {
+    public List<Booking> findByBooker(String bookerId) {
         return bookingRepository.findByBookerId(bookerId);
     }
 
-    public List<Booking> findByProvider(Long providerId) {
+    public List<Booking> findByProvider(String providerId) {
         return bookingRepository.findByProviderId(providerId);
     }
 
