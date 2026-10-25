@@ -13,9 +13,12 @@ import java.util.List;
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final EventNotificationService eventNotificationService;
 
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository,
+                        EventNotificationService eventNotificationService) {
         this.eventRepository = eventRepository;
+        this.eventNotificationService = eventNotificationService;
     }
 
     public List<EventDto> findAll() {
@@ -27,7 +30,10 @@ public class EventService {
     }
 
     public EventDto create(EventDto dto) {
-        return toDto(eventRepository.save(toEntity(dto)));
+        Event saved = eventRepository.save(toEntity(dto));
+        EventDto created = toDto(saved);
+        eventNotificationService.notifyEventCreated(created);
+        return created;
     }
 
     public EventDto update(Long id, EventDto dto) {
