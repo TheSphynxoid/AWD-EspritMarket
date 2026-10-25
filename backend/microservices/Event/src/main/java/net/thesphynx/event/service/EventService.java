@@ -1,21 +1,27 @@
 package net.thesphynx.event.service;
 
+import net.thesphynx.event.config.RabbitConfig;
 import net.thesphynx.event.dto.EventDto;
 import net.thesphynx.event.entity.Event;
 import net.thesphynx.event.repository.EventRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final RabbitTemplate rabbitTemplate;
 
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository,
+                        RabbitTemplate rabbitTemplate) {
         this.eventRepository = eventRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public List<EventDto> findAll() {
@@ -27,7 +33,18 @@ public class EventService {
     }
 
     public EventDto create(EventDto dto) {
-        return toDto(eventRepository.save(toEntity(dto)));
+        Event saved = eventRepository.save(toEntity(dto));
+        EventDto created = toDto(saved);
+
+        String recipient = "bahajouila7@gmail.com";
+        Map<String, Object> message = Map.of(
+                "recipient", recipient,
+                "message", "Un nouvel événement '" + created.getName() + "' a été créé.",
+                "type", "event"
+        );
+        rabbitTemplate.convertAndSend(RabbitConfig.NOTIFICATION_QUEUE, message);
+
+        return created;
     }
 
     public EventDto update(Long id, EventDto dto) {
@@ -77,5 +94,4 @@ public class EventService {
                 event.getMeetingLink(), event.getName(), event.getNbTickets(),
                 event.getOnline(), event.getStatus(), event.getUserId());
     }
-
 }

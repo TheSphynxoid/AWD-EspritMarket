@@ -1,22 +1,41 @@
 package net.thesphynx.event.dto;
 
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
 public class EventDto {
 
     private Long id;
+
+    @NotNull(message = "La date est obligatoire")
+    @FutureOrPresent(message = "La date doit être aujourd'hui ou dans le futur")
     private LocalDate date;
+
+    @NotBlank(message = "Le lieu est obligatoire")
+    @Pattern(regexp = "^(Bloc )?[ABCDEGHM]$", message = "Le lieu doit être un bloc parmi A, B, C, D, E, G, H, M")
     private String location;
+
     private String meetingLink;
 
     @NotBlank(message = "Le nom est obligatoire")
+    @Size(min = 5, message = "Le nom doit contenir au moins 5 lettres")
     private String name;
 
+    @NotNull(message = "Le nombre de tickets est obligatoire")
+    @Min(value = 0, message = "Le nombre de tickets ne peut pas être négatif")
     private Integer nbTickets;
+
     private Boolean online;
+
+    @Pattern(regexp = "PENDING|OPEN|PLANNED", message = "Le statut doit être PENDING, OPEN ou PLANNED")
     private String status;
+
     private Long userId;
 
     public EventDto() {
