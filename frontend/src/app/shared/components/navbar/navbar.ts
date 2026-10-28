@@ -11,6 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
       <div class="flex gap-4 items-center">
         <a routerLink="/services" routerLinkActive="underline" class="hover:text-slate-300">Services</a>
         @if (auth.isAuthenticated()) {
+          <a routerLink="/events" class="hover:text-slate-300">Events</a>
           <a routerLink="/profile" class="hover:text-slate-300">Profile</a>
           <button (click)="auth.logout()" class="bg-slate-700 px-3 py-1 rounded hover:bg-slate-600">Logout</button>
         } @else {

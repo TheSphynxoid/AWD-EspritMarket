@@ -51,6 +51,7 @@ public class GatewayRoutes {
                         .uri("lb://DELIVERY"))
 
                 .route("event", r -> r.path("/event/**")
+                        .filters(f -> f.stripPrefix(1))
                         .uri("lb://EVENT"))
 
                 .route("patnership", r -> r.path("/patnership/**")

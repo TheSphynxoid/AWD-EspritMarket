@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { RoleService } from '../../../core/services/role.service';
 
 @Component({
   selector: 'app-login',
@@ -27,6 +28,7 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class LoginComponent {
   private auth = inject(AuthService);
+  private roleService = inject(RoleService);
   private router = inject(Router);
 
   username = '';
@@ -36,7 +38,10 @@ export class LoginComponent {
   submit(): void {
     this.error.set(null);
     this.auth.login(this.username, this.password).subscribe({
-      next: () => this.router.navigate(['/services']),
+      next: () => {
+        this.roleService.setRole('admin');
+        this.router.navigate(['/events']);
+      },
       error: () => this.error.set('Login failed'),
     });
   }
