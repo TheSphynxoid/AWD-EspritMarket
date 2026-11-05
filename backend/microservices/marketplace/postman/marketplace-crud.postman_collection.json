@@ -1,132 +1,640 @@
 {
   "info": {
     "_postman_id": "marketplace-crud",
-    "name": "Marketplace CRUD",
+    "name": "Marketplace CRUD + Panier + Delivery sync",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8083" },
-    { "key": "categoryId", "value": "" },
-    { "key": "shopId", "value": "" },
-    { "key": "productId", "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "deliveryUrl",
+      "value": "http://localhost:8084"
+    },
+    {
+      "key": "categoryId",
+      "value": ""
+    },
+    {
+      "key": "shopId",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": "1"
+    },
+    {
+      "key": "deliveryId",
+      "value": "1"
+    }
   ],
   "item": [
     {
-      "name": "Categories",
+      "name": "1. Categories",
       "item": [
         {
           "name": "Create category",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Informatique\"\n}" },
-            "url": "{{baseUrl}}/mic2/categories"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/categories",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Informatique\"\n}"
+            }
           },
-          "event": [{ "listen": "test", "script": { "exec": [
-            "pm.test('Statut 201', function () { pm.response.to.have.status(201); });",
-            "pm.collectionVariables.set('categoryId', pm.response.json().id);"
-          ] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 201', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('categoryId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "List categories",
-          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/categories" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/categories"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "Shops",
+      "name": "2. Shops",
       "item": [
         {
           "name": "Create shop",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ma boutique\",\n  \"description\": \"Boutique de produits tech\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"ownerId\": 1\n}" },
-            "url": "{{baseUrl}}/mic2/shops"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/shops",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ma boutique\",\n  \"description\": \"Boutique de produits tech\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"ownerId\": 1,\n  \"ownerEmail\": \"wajdi@esprit.tn\"\n}"
+            }
           },
-          "event": [{ "listen": "test", "script": { "exec": [
-            "pm.test('Statut 201', function () { pm.response.to.have.status(201); });",
-            "pm.collectionVariables.set('shopId', pm.response.json().id);"
-          ] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 201', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('shopId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Activate shop",
-          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/shops/{{shopId}}/status?status=ACTIVE" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/shops/{{shopId}}/status?status=ACTIVE"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "List shops",
-          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/shops" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/shops"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get shop by id",
-          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/shops/{{shopId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/shops/{{shopId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update shop",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ma boutique mise a jour\",\n  \"description\": \"Nouvelle description\",\n  \"logoUrl\": \"https://example.com/new-logo.png\",\n  \"ownerId\": 1\n}" },
-            "url": "{{baseUrl}}/mic2/shops/{{shopId}}"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/shops/{{shopId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ma boutique mise a jour\",\n  \"description\": \"Nouvelle description\",\n  \"logoUrl\": \"https://example.com/new-logo.png\",\n  \"ownerId\": 1,\n  \"ownerEmail\": \"wajdi@esprit.tn\"\n}"
+            }
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
-        },
-        {
-          "name": "Delete shop",
-          "request": { "method": "DELETE", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/shops/{{shopId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 204', function () { pm.response.to.have.status(204); });"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "Products",
+      "name": "3. Products",
       "item": [
         {
           "name": "Create product",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Laptop Lenovo\",\n  \"description\": \"Laptop professionnel\",\n  \"price\": 2499.99,\n  \"stock\": 10,\n  \"imageUrl\": \"https://example.com/laptop.png\",\n  \"categoryId\": {{categoryId}}\n}" },
-            "url": "{{baseUrl}}/mic2/shops/{{shopId}}/products"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/shops/{{shopId}}/products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laptop Lenovo\",\n  \"description\": \"Laptop professionnel\",\n  \"price\": 2499.99,\n  \"stock\": 10,\n  \"imageUrl\": \"https://example.com/laptop.png\",\n  \"categoryId\": {{categoryId}}\n}"
+            }
           },
-          "event": [{ "listen": "test", "script": { "exec": [
-            "pm.test('Statut 201', function () { pm.response.to.have.status(201); });",
-            "pm.collectionVariables.set('productId', pm.response.json().id);"
-          ] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 201', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('productId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "List products by shop",
-          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/shops/{{shopId}}/products" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/shops/{{shopId}}/products"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "List all products",
-          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/products" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/products"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get product by id",
-          "request": { "method": "GET", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/products/{{productId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/products/{{productId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Update product",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Laptop Lenovo Updated\",\n  \"description\": \"Laptop professionnel mis a jour\",\n  \"price\": 2299.99,\n  \"stock\": 8,\n  \"imageUrl\": \"https://example.com/laptop-updated.png\",\n  \"categoryId\": {{categoryId}}\n}" },
-            "url": "{{baseUrl}}/mic2/products/{{productId}}"
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/products/{{productId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laptop Lenovo Updated\",\n  \"description\": \"Laptop professionnel mis a jour\",\n  \"price\": 2299.99,\n  \"stock\": 8,\n  \"imageUrl\": \"https://example.com/laptop-updated.png\",\n  \"categoryId\": {{categoryId}}\n}"
+            }
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 200', function () { pm.response.to.have.status(200); });"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Panier",
+      "item": [
+        {
+          "name": "Add item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/paniers/{{userId}}/items",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"quantity\": 2\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
         },
         {
+          "name": "Get panier",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/mic2/paniers/{{userId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/paniers/{{userId}}/items/{{productId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 5\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/mic2/paniers/{{userId}}/items/{{productId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Clear panier",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/mic2/paniers/{{userId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Delivery sync (Marketplace -> Delivery via Feign)",
+      "item": [
+        {
+          "name": "1. Create delivery sync",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/deliveries/sync",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientName\": \"Ahmed Ben Ali\",\n  \"address\": \"12 rue de la Liberte\",\n  \"city\": \"Tunis\",\n  \"postalCode\": \"1000\",\n  \"phone\": \"+21612345678\",\n  \"deliveryFee\": 5.0,\n  \"deliveryType\": \"STANDARD\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('status PENDING', function () { pm.expect(pm.response.json().status).to.eql('PENDING'); });",
+                  "pm.collectionVariables.set('deliveryId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. PREUVE - Delivery direct (port 8084)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{deliveryUrl}}/api/deliveries"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Get delivery sync",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/mic2/deliveries/sync/{{deliveryId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. List deliveries sync",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/mic2/deliveries/sync"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Update status sync (IN_PROGRESS)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/mic2/deliveries/sync/{{deliveryId}}/status?status=IN_PROGRESS"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('status IN_PROGRESS', function () { pm.expect(pm.response.json().status).to.eql('IN_PROGRESS'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6. PREUVE - Delivery direct par id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{deliveryUrl}}/api/deliveries/{{deliveryId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Cleanup (a lancer en dernier)",
+      "item": [
+        {
           "name": "Delete product",
-          "request": { "method": "DELETE", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/mic2/products/{{productId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Statut 204', function () { pm.response.to.have.status(204); });"] } }]
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/products/{{productId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete shop",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/mic2/shops/{{shopId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Statut 204', function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
         }
       ]
     }

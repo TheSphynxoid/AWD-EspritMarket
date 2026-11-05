@@ -49,6 +49,9 @@ public class Shop {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(length = 150)
+    private String ownerEmail;  
+
     @JsonIgnore
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Product> products = new ArrayList<>();
