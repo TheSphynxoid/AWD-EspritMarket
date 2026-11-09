@@ -54,6 +54,9 @@ public class GatewayRoutes {
                         .filters(f -> f.stripPrefix(1))
                         .uri("lb://EVENT"))
 
+                .route("event-mic1", r -> r.path("/mic1/**")
+                        .uri("lb://EVENT"))
+
                 .route("patnership", r -> r.path("/patnership/**")
                         .uri("lb://PATNERSHIP"))
 
