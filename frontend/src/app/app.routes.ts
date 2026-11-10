@@ -10,7 +10,7 @@ import { RoleSelectComponent } from './features/role-select/role-select';
 import { EventListComponent } from './features/events/event-list/event-list';
 import { EventDetailComponent } from './features/events/event-detail/event-detail';
 import { EventFormComponent } from './features/events/event-form/event-form';
-
+import { TicketsComponent } from './features/tickets/tickets';
 export const routes: Routes = [
   { path: '', redirectTo: 'services', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
@@ -24,4 +24,5 @@ export const routes: Routes = [
   { path: 'events/new', component: EventFormComponent, canActivate: [authGuard] },
   { path: 'events/:id', component: EventDetailComponent, canActivate: [authGuard] },
   { path: 'events/:id/edit', component: EventFormComponent, canActivate: [authGuard] },
+  { path: 'tickets', component: TicketsComponent, canActivate: [authGuard] },
 ];
