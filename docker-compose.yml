@@ -2,10 +2,23 @@ version: '3.9'
 
 services:
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:management
     ports:
       - "5672:5672"
       - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: marketplace_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: baha
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   keycloak-db:
     image: postgres:15
@@ -34,4 +47,6 @@ services:
       - keycloak-db
 
 volumes:
+  rabbitmq_data:
+  postgres_data:
   keycloak_db_data:

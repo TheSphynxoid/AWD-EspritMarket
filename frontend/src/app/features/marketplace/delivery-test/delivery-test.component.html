@@ -1,0 +1,63 @@
+<div class="max-w-6xl mx-auto p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-3xl font-bold">Sync Communication Test (marketplace ↔ delivery)</h1>
+    <a routerLink="/marketplace" class="text-blue-600 hover:underline">← Back</a>
+  </div>
+
+  <div class="grid gap-6 md:grid-cols-2">
+    <!-- Form -->
+    <div class="bg-white rounded-xl shadow p-5">
+      <h2 class="text-xl font-semibold mb-4">Create delivery (synchronous)</h2>
+      @if (error()) {
+        <p class="text-red-600 mb-4">{{ error() }}</p>
+      }
+      <div class="space-y-3">
+        <input [(ngModel)]="recipientName" placeholder="Recipient name" class="w-full border rounded px-3 py-2" />
+        <input [(ngModel)]="address" placeholder="Address" class="w-full border rounded px-3 py-2" />
+        <input [(ngModel)]="city" placeholder="City" class="w-full border rounded px-3 py-2" />
+        <input [(ngModel)]="postalCode" placeholder="Postal code" class="w-full border rounded px-3 py-2" />
+        <input [(ngModel)]="phone" placeholder="Phone" class="w-full border rounded px-3 py-2" />
+        <div class="text-sm text-slate-500">Delivery fee: 8 DT (fixed)</div>
+        <select [(ngModel)]="deliveryType" class="w-full border rounded px-3 py-2">
+          <option value="STANDARD">STANDARD</option>
+          <option value="EXPRESS">EXPRESS</option>
+          <option value="SAME_DAY">SAME_DAY</option>
+        </select>
+        <div class="flex gap-2">
+          <button (click)="submit()" [disabled]="loading()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 disabled:opacity-50">
+            {{ loading() ? 'Creating (sync)...' : 'Create (sync)' }}
+          </button>
+          <button (click)="reset()" class="bg-slate-200 px-4 py-2 rounded hover:bg-slate-300">Reset</button>
+        </div>
+      </div>
+
+      @if (result()) {
+        <div class="mt-4 p-3 bg-green-50 rounded border border-green-200">
+          <p class="font-semibold text-green-700">Sync response received:</p>
+          <pre class="text-xs mt-2">{{ result() | json }}</pre>
+        </div>
+      }
+    </div>
+
+    <!-- List -->
+    <div class="bg-white rounded-xl shadow p-5">
+      <h2 class="text-xl font-semibold mb-4">Deliveries (from delivery via sync)</h2>
+      @if (deliveries().length === 0) {
+        <p class="text-slate-500">No deliveries yet.</p>
+      } @else {
+        <ul class="divide-y">
+          @for (d of deliveries(); track d.id) {
+            <li class="py-3">
+              <div class="font-medium">{{ d.recipientName }} — {{ d.city }}</div>
+              <div class="text-sm text-slate-500">Status: {{ d.status }} · Fee: {{ d.deliveryFee }}</div>
+              <div class="flex gap-2 mt-2">
+                <button (click)="updateStatus(d, 'IN_PROGRESS')" class="text-blue-600 hover:underline text-sm">In progress</button>
+                <button (click)="updateStatus(d, 'DELIVERED')" class="text-green-600 hover:underline text-sm">Delivered</button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+</div>

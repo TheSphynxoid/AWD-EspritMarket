@@ -11,6 +11,13 @@ import { EventListComponent } from './features/events/event-list/event-list';
 import { EventDetailComponent } from './features/events/event-detail/event-detail';
 import { EventFormComponent } from './features/events/event-form/event-form';
 import { TicketsComponent } from './features/tickets/tickets';
+import { ShopListComponent } from './features/marketplace/shop-list/shop-list.component';
+import { ShopDetailComponent } from './features/marketplace/shop-detail/shop-detail.component';
+import { CartComponent } from './features/marketplace/cart/cart.component';
+import { AdminDashboardComponent } from './features/marketplace/admin-dashboard/admin-dashboard.component';
+import { ShopCreateComponent } from './features/marketplace/shop-create/shop-create.component';
+import { ProductListComponent } from './features/marketplace/product-list/product-list.component';
+import { DeliveryTestComponent } from './features/marketplace/delivery-test/delivery-test.component';
 export const routes: Routes = [
   { path: '', redirectTo: 'services', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
@@ -25,4 +32,11 @@ export const routes: Routes = [
   { path: 'events/:id', component: EventDetailComponent, canActivate: [authGuard] },
   { path: 'events/:id/edit', component: EventFormComponent, canActivate: [authGuard] },
   { path: 'tickets', component: TicketsComponent, canActivate: [authGuard] },
+  { path: 'marketplace', component: ShopListComponent },
+  { path: 'marketplace/products', component: ProductListComponent },
+  { path: 'marketplace/shops/new', component: ShopCreateComponent },
+  { path: 'marketplace/shops/:id', component: ShopDetailComponent },
+  { path: 'marketplace/cart', component: CartComponent },
+  { path: 'marketplace/admin', component: AdminDashboardComponent, canActivate: [authGuard] },
+  { path: 'marketplace/delivery-test', component: DeliveryTestComponent },
 ];

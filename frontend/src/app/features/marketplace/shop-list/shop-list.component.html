@@ -1,0 +1,31 @@
+<div class="max-w-6xl mx-auto p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-3xl font-bold">Shops</h1>
+    <div class="flex gap-2">
+      <a routerLink="/marketplace/products" class="bg-slate-200 px-4 py-2 rounded hover:bg-slate-300">All products</a>
+      <a routerLink="/marketplace/delivery-test" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-500">Sync test</a>
+      <a routerLink="/marketplace/shops/new" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500">Open a shop</a>
+      <a routerLink="/marketplace/admin" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Admin</a>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="text-slate-500">Loading shops...</p>
+  } @else if (error()) {
+    <p class="text-red-600">{{ error() }}</p>
+  } @else if (shops().length === 0) {
+    <p class="text-slate-500">No shops yet.</p>
+  } @else {
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      @for (s of shops(); track s.id) {
+        <a [routerLink]="['/marketplace/shops', s.id]" class="block bg-white rounded-xl shadow p-5 hover:shadow-lg transition">
+          <h2 class="text-xl font-semibold">{{ s.name }}</h2>
+          <p class="text-slate-600 text-sm mt-2 line-clamp-3">{{ s.description }}</p>
+          <div class="mt-4 flex items-center justify-between text-sm">
+            <span class="text-slate-500">{{ s.ownerEmail }}</span>
+          </div>
+        </a>
+      }
+    </div>
+  }
+</div>

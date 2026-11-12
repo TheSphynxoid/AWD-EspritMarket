@@ -1,0 +1,26 @@
+<div class="max-w-2xl mx-auto p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-3xl font-bold">Open a shop</h1>
+    <a routerLink="/marketplace" class="text-blue-600 hover:underline">← Back</a>
+  </div>
+
+  @if (!isLoggedIn) {
+    <p class="text-amber-600 mb-4">
+      You must be logged in to open a shop.
+      <a routerLink="/login" class="text-blue-600 hover:underline">Go to login</a>
+    </p>
+  }
+
+  @if (error()) {
+    <p class="text-red-600 mb-4">{{ error() }}</p>
+  }
+
+  <div class="bg-white rounded-xl shadow p-5 space-y-3">
+    <input [(ngModel)]="name" placeholder="Shop name" class="w-full border rounded px-3 py-2" />
+    <textarea [(ngModel)]="description" placeholder="Description" class="w-full border rounded px-3 py-2"></textarea>
+    <input [(ngModel)]="ownerEmail" type="email" placeholder="Owner email" class="w-full border rounded px-3 py-2" />
+    <button (click)="submit()" [disabled]="loading()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 disabled:opacity-50">
+      {{ loading() ? 'Creating...' : 'Create shop' }}
+    </button>
+  </div>
+</div>

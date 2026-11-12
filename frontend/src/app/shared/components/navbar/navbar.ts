@@ -10,6 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
       <a routerLink="/" class="text-xl font-bold">EspritMarket</a>
       <div class="flex gap-4 items-center">
         <a routerLink="/services" routerLinkActive="underline" class="hover:text-slate-300">Services</a>
+        <a routerLink="/marketplace" routerLinkActive="underline" class="hover:text-slate-300">Marketplace</a>
         @if (auth.isAuthenticated()) {
           <a routerLink="/events" class="hover:text-slate-300">Events</a>
           <a routerLink="/profile" class="hover:text-slate-300">Profile</a>

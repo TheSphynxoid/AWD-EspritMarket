@@ -3,11 +3,13 @@ package net.thesphynx.marketplace.service;
 import net.thesphynx.marketplace.client.DeliveryFeignClient;
 import net.thesphynx.marketplace.dto.DeliveryDto;
 import net.thesphynx.marketplace.dto.DeliveryStatusDto;
+import lombok.extern.slf4j.Slf4j;
 import net.thesphynx.marketplace.enums.DeliveryStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class DeliveryIntegrationService {
 
@@ -19,7 +21,12 @@ public class DeliveryIntegrationService {
 
     /** Appel bloquant via Feign : cree la livraison et attend la reponse de delivery. */
     public DeliveryDto createDeliverySync(DeliveryDto dto) {
-        return deliveryFeignClient.create(dto);
+        // Le frais de transport est fixe a 8 DT (non modifiable par l'utilisateur)
+        dto.setDeliveryFee(8.0);
+        log.info("[SYNC] Appel Feign vers Delivery pour creer une livraison : {}", dto.getRecipientName());
+        DeliveryDto created = deliveryFeignClient.create(dto);
+        log.info("[SYNC] Reponse recue de Delivery, id={}", created != null ? created.getId() : null);
+        return created;
     }
 
     public DeliveryDto getDeliverySync(Long id) {

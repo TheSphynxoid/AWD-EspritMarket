@@ -7,5 +7,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'events/**', renderMode: RenderMode.Client },
   { path: 'tickets', renderMode: RenderMode.Client },
   { path: 'tickets/**', renderMode: RenderMode.Client },
+  { path: 'marketplace', renderMode: RenderMode.Client },
+  { path: 'marketplace/**', renderMode: RenderMode.Client },
   { path: '**', renderMode: RenderMode.Prerender },
 ];
