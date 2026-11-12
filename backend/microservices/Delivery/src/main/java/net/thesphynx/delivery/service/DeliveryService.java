@@ -1,5 +1,6 @@
 package net.thesphynx.delivery.service;
 
+import net.thesphynx.delivery.dto.DeliveryDto;
 import net.thesphynx.delivery.entity.Deliverer;
 import net.thesphynx.delivery.entity.Delivery;
 import net.thesphynx.delivery.enums.DeliveryStatus;
@@ -26,30 +27,28 @@ public class DeliveryService {
         this.delivererService = delivererService;
     }
 
-    public List<Delivery> findAll() {
-        return deliveryRepository.findAll();
+    public List<DeliveryDto> findAll() {
+        return deliveryRepository.findAll().stream().map(this::toDto).toList();
     }
 
-    public Delivery findById(Long id) {
-        return getDelivery(id);
+    public DeliveryDto findById(Long id) {
+        return toDto(getDelivery(id));
     }
 
-    public Delivery create(Delivery data) {
-        Delivery delivery = new Delivery();
-        copyInfo(delivery, data);
+    public DeliveryDto create(DeliveryDto dto) {
         // status = PENDING et createdAt générés dans @PrePersist
-        return deliveryRepository.save(delivery);
+        return toDto(deliveryRepository.save(toEntity(dto)));
     }
 
-    public Delivery update(Long id, Delivery data) {
+    public DeliveryDto update(Long id, DeliveryDto dto) {
         Delivery delivery = getDelivery(id);
         ensureNotClosed(delivery);
-        copyInfo(delivery, data);
-        return deliveryRepository.save(delivery);
+        updateEntity(delivery, dto);
+        return toDto(deliveryRepository.save(delivery));
     }
 
     @Transactional
-    public Delivery updateStatus(Long id, DeliveryStatus status) {
+    public DeliveryDto updateStatus(Long id, DeliveryStatus status) {
         Delivery delivery = getDelivery(id);
         ensureNotClosed(delivery);
         delivery.setStatus(status);
@@ -58,7 +57,7 @@ public class DeliveryService {
                 && delivery.getDeliverer() != null) {
             release(delivery.getDeliverer());
         }
-        return deliveryRepository.save(delivery);
+        return toDto(deliveryRepository.save(delivery));
     }
 
     @Transactional
@@ -71,13 +70,13 @@ public class DeliveryService {
     }
 
     @Transactional
-    public Delivery assignDeliverer(Long id, Long delivererId) {
+    public DeliveryDto assignDeliverer(Long id, Long delivererId) {
         Delivery delivery = getDelivery(id);
         ensureNotClosed(delivery);
         Deliverer deliverer = delivererService.getDeliverer(delivererId);
 
         if (delivery.getDeliverer() != null && delivery.getDeliverer().getId().equals(delivererId)) {
-            return delivery;
+            return toDto(delivery);
         }
         if (!Boolean.TRUE.equals(deliverer.getAvailable())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -90,7 +89,7 @@ public class DeliveryService {
         deliverer.setAvailable(false);
         delivererRepository.save(deliverer);
         delivery.setDeliverer(deliverer);
-        return deliveryRepository.save(delivery);
+        return toDto(deliveryRepository.save(delivery));
     }
 
     private Delivery getDelivery(Long id) {
@@ -99,14 +98,28 @@ public class DeliveryService {
                         HttpStatus.NOT_FOUND, "Livraison introuvable : " + id));
     }
 
-    private void copyInfo(Delivery delivery, Delivery data) {
-        delivery.setRecipientName(data.getRecipientName());
-        delivery.setAddress(data.getAddress());
-        delivery.setCity(data.getCity());
-        delivery.setPostalCode(data.getPostalCode());
-        delivery.setPhone(data.getPhone());
-        delivery.setDeliveryFee(data.getDeliveryFee());
-        delivery.setDeliveryType(data.getDeliveryType());
+    private Delivery toEntity(DeliveryDto dto) {
+        Delivery delivery = new Delivery();
+        updateEntity(delivery, dto);
+        return delivery;
+    }
+
+    /** status, createdAt et delivererId ne sont jamais pris depuis le DTO. */
+    private void updateEntity(Delivery delivery, DeliveryDto dto) {
+        delivery.setRecipientName(dto.getRecipientName());
+        delivery.setAddress(dto.getAddress());
+        delivery.setCity(dto.getCity());
+        delivery.setPostalCode(dto.getPostalCode());
+        delivery.setPhone(dto.getPhone());
+        delivery.setDeliveryFee(dto.getDeliveryFee());
+        delivery.setDeliveryType(dto.getDeliveryType());
+    }
+
+    private DeliveryDto toDto(Delivery delivery) {
+        return new DeliveryDto(delivery.getId(), delivery.getRecipientName(), delivery.getAddress(),
+                delivery.getCity(), delivery.getPostalCode(), delivery.getPhone(), delivery.getDeliveryFee(),
+                delivery.getDeliveryType(), delivery.getStatus(), delivery.getCreatedAt(),
+                delivery.getDeliverer() != null ? delivery.getDeliverer().getId() : null);
     }
 
     private void release(Deliverer deliverer) {

@@ -51,10 +51,20 @@ public class GatewayRoutes {
                         .uri("lb://DELIVERY"))
 
                 .route("event", r -> r.path("/event/**")
+                        .filters(f -> f.stripPrefix(1))
+                        .uri("lb://EVENT"))
+
+                .route("event-mic1", r -> r.path("/mic1/**")
                         .uri("lb://EVENT"))
 
                 .route("patnership", r -> r.path("/patnership/**")
                         .uri("lb://PATNERSHIP"))
+
+                .route("user", r -> r.path("/user/**")
+                        .uri("lb://USER"))
+
+                .route("notification", r -> r.path("/notification/**")
+                        .uri("lb://NOTIFICATION"))
 
                 .build();
     }

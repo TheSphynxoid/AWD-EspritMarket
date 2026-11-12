@@ -16,9 +16,13 @@ skinparam rectangle {
 
 actor "Poste client\nNavigateur" as Client
 
+rectangle "**Frontend Angular**\nSPA\n<b>:4200</b>" as FE #E8F5E9
+
 rectangle "**API Gateway**\nSpring Cloud Gateway\n<b>:8088</b>" as GW #EFEFEF
 
 rectangle "**Eureka**\nSpring Cloud Netflix\n<b>:8761</b>" as EU #EFEFEF
+
+rectangle "**Keycloak**\nOAuth2 / JWT\n<b>:8180</b>" as KC #FFF3E0
 
 package "Serveurs applicatifs (microservices)" as APP #DFF2F0 {
   rectangle "**SRV**\nSpring Boot\n<b>:8082</b>" as SRV
@@ -26,26 +30,36 @@ package "Serveurs applicatifs (microservices)" as APP #DFF2F0 {
   rectangle "**Delivery**\nSpring Boot\n<b>:8084</b>" as DEL
   rectangle "**event**\nSpring Boot\n<b>:8085</b>" as EVT
   rectangle "**Patnership**\nSpring Boot\n<b>:8086</b>" as PTN
+  rectangle "**User**\nSpring Boot\n<b>:8087</b>" as USR
+  rectangle "**Notification**\nPython / FastAPI\n<b>:8090</b>" as NOT
   SRV -[hidden]right-> MKT
   MKT -[hidden]right-> DEL
   DEL -[hidden]right-> EVT
   EVT -[hidden]right-> PTN
+  PTN -[hidden]right-> USR
+  USR -[hidden]right-> NOT
 }
 
 package "Serveur PostgreSQL" as DBS #FDEBD2 {
   database "**awd-Delivery**" as AWDDB
   database "**awd-event**" as EVTDB
   database "**awd-Partnership**" as PTNDB
+  database "**awd-srv**" as SRVDB
+  database "**keycloak**" as KCDB
   AWDDB -[hidden]right-> EVTDB
   EVTDB -[hidden]right-> PTNDB
+  PTNDB -[hidden]right-> SRVDB
+  SRVDB -[hidden]right-> KCDB
 }
+
+rectangle "**RabbitMQ**\nbroker de messages\n<b>:5672 / :15672</b>" as RMQ #E3F2FD
+
+Client -down-> FE : HTTP
+FE -down-> GW : HTTP
 
 Client -[hidden]right-> EU
 
-Client -down-> GW : HTTP
-
 GW -down-> APP : HTTP
-
 GW .up.> EU : enregistrement
 
 SRV .up.> EU : enregistrement
@@ -53,9 +67,20 @@ MKT .up.> EU : enregistrement
 DEL .up.> EU : enregistrement
 EVT .up.> EU : enregistrement
 PTN .up.> EU : enregistrement
+USR .up.> EU : enregistrement
+NOT .up.> EU : enregistrement
+
+USR .up.> KC : OAuth2 / JWT
+KC -down-> KCDB : JDBC
 
 DEL -down-> AWDDB : JDBC
 EVT -down-> EVTDB : JDBC
 PTN -down-> PTNDB : JDBC
+SRV -down-> SRVDB : JDBC
+
+EVT -right-> RMQ : publication (async)
+RMQ -right-> NOT : consommation (async)
+
+NOT -down-> RMQ : fallback / publish
 
 @enduml

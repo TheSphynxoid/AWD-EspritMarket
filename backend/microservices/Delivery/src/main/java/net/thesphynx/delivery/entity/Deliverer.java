@@ -1,8 +1,6 @@
 package net.thesphynx.delivery.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 
 @Entity
 @Table(name = "deliverer")
@@ -12,12 +10,9 @@ public class Deliverer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Le nom complet est obligatoire")
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @NotBlank(message = "Le téléphone est obligatoire")
-    @Pattern(regexp = "^\\+?[0-9]{8,15}$", message = "Numéro de téléphone invalide")
     @Column(nullable = false)
     private String phone;
 

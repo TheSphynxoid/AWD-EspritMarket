@@ -1,7 +1,7 @@
 package net.thesphynx.delivery.controller;
 
 import jakarta.validation.Valid;
-import net.thesphynx.delivery.entity.Deliverer;
+import net.thesphynx.delivery.dto.DelivererDto;
 import net.thesphynx.delivery.service.DelivererService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,24 +20,24 @@ public class DelivererController {
     }
 
     @GetMapping
-    public List<Deliverer> findAll() {
+    public List<DelivererDto> findAll() {
         return delivererService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Deliverer findById(@PathVariable Long id) {
+    public DelivererDto findById(@PathVariable Long id) {
         return delivererService.findById(id);
     }
 
     @PostMapping
-    public ResponseEntity<Deliverer> create(@Valid @RequestBody Deliverer deliverer) {
-        Deliverer created = delivererService.create(deliverer);
+    public ResponseEntity<DelivererDto> create(@Valid @RequestBody DelivererDto dto) {
+        DelivererDto created = delivererService.create(dto);
         return ResponseEntity.created(URI.create("/api/deliverers/" + created.getId())).body(created);
     }
 
     @PutMapping("/{id}")
-    public Deliverer update(@PathVariable Long id, @Valid @RequestBody Deliverer deliverer) {
-        return delivererService.update(id, deliverer);
+    public DelivererDto update(@PathVariable Long id, @Valid @RequestBody DelivererDto dto) {
+        return delivererService.update(id, dto);
     }
 
     @DeleteMapping("/{id}")
