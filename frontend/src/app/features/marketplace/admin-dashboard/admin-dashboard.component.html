@@ -1,0 +1,69 @@
+<div class="max-w-6xl mx-auto p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-3xl font-bold">Admin Dashboard</h1>
+    <a routerLink="/marketplace" class="text-blue-600 hover:underline">← Back to shops</a>
+  </div>
+
+  <div class="mb-6">
+    <label class="block text-sm font-medium mb-1">Select shop</label>
+    <select class="border rounded px-3 py-2" [ngModel]="selectedShopId()" (ngModelChange)="onShopChange($event)">
+      <option [ngValue]="null">-- choose a shop --</option>
+      @for (s of shops(); track s.id) {
+        <option [ngValue]="s.id">{{ s.name }}</option>
+      }
+    </select>
+  </div>
+
+  @if (success()) {
+    <p class="text-green-600 mb-4">{{ success() }}</p>
+  }
+
+  @if (selectedShopId()) {
+    <div class="grid gap-6 md:grid-cols-2">
+      <!-- Form -->
+      <div class="bg-white rounded-xl shadow p-5">
+        <h2 class="text-xl font-semibold mb-4">{{ editingId ? 'Edit product' : 'Add product' }}</h2>
+        <div class="space-y-3">
+          <input [(ngModel)]="name" placeholder="Name" class="w-full border rounded px-3 py-2" />
+          <textarea [(ngModel)]="description" placeholder="Description" class="w-full border rounded px-3 py-2"></textarea>
+          <input [(ngModel)]="price" type="number" placeholder="Price" class="w-full border rounded px-3 py-2" />
+          <input [(ngModel)]="stock" type="number" placeholder="Stock" class="w-full border rounded px-3 py-2" />
+          <input [(ngModel)]="categoryId" type="number" placeholder="Category ID (optional)" class="w-full border rounded px-3 py-2" />
+          <div class="flex gap-2">
+            <button (click)="submit()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">
+              {{ editingId ? 'Update' : 'Create' }}
+            </button>
+            @if (editingId) {
+              <button (click)="resetForm()" class="bg-slate-200 px-4 py-2 rounded hover:bg-slate-300">Cancel</button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- List -->
+      <div class="bg-white rounded-xl shadow p-5">
+        <h2 class="text-xl font-semibold mb-4">Products</h2>
+        @if (loading()) {
+          <p class="text-slate-500">Loading...</p>
+        } @else if (products().length === 0) {
+          <p class="text-slate-500">No products.</p>
+        } @else {
+          <ul class="divide-y">
+            @for (p of products(); track p.id) {
+              <li class="py-3 flex items-center justify-between">
+                <div>
+                  <div class="font-medium">{{ p.name }}</div>
+                  <div class="text-sm text-slate-500">{{ p.price }} TND · stock {{ p.stock }}</div>
+                </div>
+                <div class="flex gap-2">
+                  <button (click)="edit(p)" class="text-blue-600 hover:underline">Edit</button>
+                  <button (click)="remove(p)" class="text-red-600 hover:underline">Delete</button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  }
+</div>

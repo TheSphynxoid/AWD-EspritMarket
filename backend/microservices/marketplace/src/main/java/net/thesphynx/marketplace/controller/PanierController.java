@@ -23,31 +23,31 @@ public class PanierController {
     }
 
     @GetMapping("/mic2/paniers/{userId}")
-    public PanierResponse getPanier(@PathVariable Long userId) {
+    public PanierResponse getPanier(@PathVariable String userId) {
         return service.getPanier(userId);
     }
 
     @PostMapping("/mic2/paniers/{userId}/items")
-    public PanierResponse addItem(@PathVariable Long userId,
+    public PanierResponse addItem(@PathVariable String userId,
                                 @Valid @RequestBody AjouterAuPanierRequest request) {
         return service.addItem(userId, request);
     }
 
     @PutMapping("/mic2/paniers/{userId}/items/{productId}")
-    public PanierResponse updateItem(@PathVariable Long userId,
+    public PanierResponse updateItem(@PathVariable String userId,
                                    @PathVariable Long productId,
                                    @Valid @RequestBody ModifierLignePanierRequest request) {
         return service.updateItem(userId, productId, request);
     }
 
     @DeleteMapping("/mic2/paniers/{userId}/items/{productId}")
-    public ResponseEntity<Void> removeItem(@PathVariable Long userId, @PathVariable Long productId) {
+    public ResponseEntity<Void> removeItem(@PathVariable String userId, @PathVariable Long productId) {
         service.removeItem(userId, productId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/mic2/paniers/{userId}")
-    public ResponseEntity<Void> clearPanier(@PathVariable Long userId) {
+    public ResponseEntity<Void> clearPanier(@PathVariable String userId) {
         service.clearPanier(userId);
         return ResponseEntity.noContent().build();
     }

@@ -16,6 +16,13 @@ import { JobOfferListComponent } from './features/partnership/job-offer-list/job
 import { JobOfferDetailComponent } from './features/partnership/job-offer-detail/job-offer-detail';
 import { ApplicationListComponent } from './features/partnership/application-list/application-list';
 import { InterviewListComponent } from './features/partnership/interview-list/interview-list';
+import { ShopListComponent } from './features/marketplace/shop-list/shop-list.component';
+import { ShopDetailComponent } from './features/marketplace/shop-detail/shop-detail.component';
+import { ShopCreateComponent } from './features/marketplace/shop-create/shop-create.component';
+import { ProductListComponent } from './features/marketplace/product-list/product-list.component';
+import { CartComponent } from './features/marketplace/cart/cart.component';
+import { AdminDashboardComponent } from './features/marketplace/admin-dashboard/admin-dashboard.component';
+import { DeliveryTestComponent } from './features/marketplace/delivery-test/delivery-test.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'services', pathMatch: 'full' },
@@ -50,4 +57,13 @@ export const routes: Routes = [
   { path: 'partnership/job-offers/:id', component: JobOfferDetailComponent },
   { path: 'partnership/applications', component: ApplicationListComponent, canActivate: [authGuard] },
   { path: 'partnership/interviews', component: InterviewListComponent, canActivate: [authGuard] },
+
+  // ── Marketplace (boutiques / produits en lecture publique ; le reste exige un JWT) ──
+  { path: 'marketplace', component: ShopListComponent },
+  { path: 'marketplace/products', component: ProductListComponent },
+  { path: 'marketplace/shops/new', component: ShopCreateComponent, canActivate: [authGuard] },
+  { path: 'marketplace/shops/:id', component: ShopDetailComponent },
+  { path: 'marketplace/cart', component: CartComponent, canActivate: [authGuard] },
+  { path: 'marketplace/admin', component: AdminDashboardComponent, canActivate: [authGuard] },
+  { path: 'marketplace/delivery-test', component: DeliveryTestComponent, canActivate: [authGuard] },
 ];

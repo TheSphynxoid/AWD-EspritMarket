@@ -13,9 +13,27 @@ import { AuthService } from '../../../core/services/auth.service';
         <a routerLink="/delivery" routerLinkActive="underline" class="hover:text-slate-300">Livraisons</a>
 
 
+        <!-- Marketplace dropdown -->
+        <div class="relative">
+          <button (click)="marketplaceOpen.set(!marketplaceOpen()); partnershipOpen.set(false)"
+            class="hover:text-slate-300 flex items-center gap-1">
+            Marketplace
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          @if (marketplaceOpen()) {
+            <div class="absolute top-full left-0 mt-2 w-52 bg-slate-800 rounded-lg shadow-xl py-2 z-50">
+              <a routerLink="/marketplace" (click)="marketplaceOpen.set(false)" class="block px-4 py-2 text-sm hover:bg-slate-700 transition">🏬 Boutiques</a>
+              <a routerLink="/marketplace/products" (click)="marketplaceOpen.set(false)" class="block px-4 py-2 text-sm hover:bg-slate-700 transition">📦 Produits</a>
+              <a routerLink="/marketplace/cart" (click)="marketplaceOpen.set(false)" class="block px-4 py-2 text-sm hover:bg-slate-700 transition">🛒 Panier</a>
+              <a routerLink="/marketplace/admin" (click)="marketplaceOpen.set(false)" class="block px-4 py-2 text-sm hover:bg-slate-700 transition">🛠️ Mes boutiques</a>
+              <a routerLink="/marketplace/delivery-test" (click)="marketplaceOpen.set(false)" class="block px-4 py-2 text-sm hover:bg-slate-700 transition">🚚 Test livraison</a>
+            </div>
+          }
+        </div>
+
         <!-- Partnership dropdown -->
         <div class="relative">
-          <button (click)="partnershipOpen.set(!partnershipOpen())"
+          <button (click)="partnershipOpen.set(!partnershipOpen()); marketplaceOpen.set(false)"
             class="hover:text-slate-300 flex items-center gap-1">
             Partnership
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -48,4 +66,5 @@ import { AuthService } from '../../../core/services/auth.service';
 export class NavbarComponent {
   auth = inject(AuthService);
   partnershipOpen = signal(false);
+  marketplaceOpen = signal(false);
 }

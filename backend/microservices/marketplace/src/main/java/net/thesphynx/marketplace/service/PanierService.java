@@ -31,11 +31,11 @@ public class PanierService {
     }
 
     @Transactional
-    public PanierResponse getPanier(Long userId) {
+    public PanierResponse getPanier(String userId) {
         return toResponse(getOrCreatePanier(userId));
     }
 
-    public PanierResponse addItem(Long userId, AjouterAuPanierRequest request) {
+    public PanierResponse addItem(String userId, AjouterAuPanierRequest request) {
         Panier panier = getOrCreatePanier(userId);
         Product product = findProduct(request.productId());
         validateProduct(product);
@@ -57,7 +57,7 @@ public class PanierService {
         return toResponse(panier);
     }
 
-    public PanierResponse updateItem(Long userId, Long productId, ModifierLignePanierRequest request) {
+    public PanierResponse updateItem(String userId, Long productId, ModifierLignePanierRequest request) {
         Panier panier = findPanier(userId);
         LignePanier ligne = findLignePanier(panier, productId);
         Product product = ligne.getProduct();
@@ -67,19 +67,19 @@ public class PanierService {
         return toResponse(panier);
     }
 
-    public void removeItem(Long userId, Long productId) {
+    public void removeItem(String userId, Long productId) {
         Panier panier = findPanier(userId);
         LignePanier ligne = findLignePanier(panier, productId);
         panier.getLignes().remove(ligne);
         lignes.delete(ligne);
     }
 
-    public void clearPanier(Long userId) {
+    public void clearPanier(String userId) {
         Panier panier = findPanier(userId);
         panier.getLignes().clear();
     }
 
-    private Panier getOrCreatePanier(Long userId) {
+    private Panier getOrCreatePanier(String userId) {
         return paniers.findByUserId(userId).orElseGet(() -> {
             Panier panier = new Panier();
             panier.setUserId(userId);
@@ -87,7 +87,7 @@ public class PanierService {
         });
     }
 
-    private Panier findPanier(Long userId) {
+    private Panier findPanier(String userId) {
         return paniers.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Panier introuvable pour l'utilisateur: " + userId));
     }

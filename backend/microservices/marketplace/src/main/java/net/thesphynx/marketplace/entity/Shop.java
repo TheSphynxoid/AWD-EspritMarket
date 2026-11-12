@@ -39,8 +39,8 @@ public class Shop {
     @Column(length = 500)
     private String logoUrl;
 
-    @Column(nullable = false)
-    private Long ownerId;
+    @Column(nullable = false, length = 64)
+    private String ownerId;   // identifiant Keycloak (sub)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

@@ -5,6 +5,6 @@ import net.thesphynx.marketplace.entity.Shop;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ShopRepository extends JpaRepository<Shop, Long> {
-    List<Shop> findByOwnerId(Long ownerId);
+    List<Shop> findByOwnerId(String ownerId);
     boolean existsByName(String name);
 }

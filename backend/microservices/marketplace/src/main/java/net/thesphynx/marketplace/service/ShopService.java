@@ -9,15 +9,14 @@ import net.thesphynx.marketplace.exception.DuplicateResourceException;
 import net.thesphynx.marketplace.exception.ResourceNotFoundException;
 import net.thesphynx.marketplace.messaging.ShopEventProducer;
 import net.thesphynx.marketplace.repository.ShopRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional
 public class ShopService {
-
-    // Seuls les emails qui se terminent par ce domaine peuvent ouvrir une boutique
-    private static final String ALLOWED_DOMAIN = "@esprit.tn";
 
     private final ShopRepository repository;
     private final ShopEventProducer producer;
@@ -28,10 +27,10 @@ public class ShopService {
     }
 
     public ShopResponse create(ShopRequest request) {
-        // 1. Refuser tout email qui n'est pas @esprit.tn (rien n'est enregistré)
         String email = request.ownerEmail().trim().toLowerCase();
-        if (!email.endsWith(ALLOWED_DOMAIN)) {
-            throw new IllegalStateException("Seul un email @esprit.tn peut ouvrir une boutique");
+        // Accepter toute adresse e-mail contenant '@' (pas seulement @esprit.tn)
+        if (!email.contains("@")) {
+            throw new IllegalArgumentException("L'adresse e-mail doit contenir '@'");
         }
 
         if (repository.existsByName(request.name())) throw new DuplicateResourceException("Une boutique existe déjà avec ce nom");
@@ -39,9 +38,12 @@ public class ShopService {
         Shop shop = new Shop();
         copy(request, shop);
         shop.setOwnerEmail(email);
-        shop.setStatus(ShopStatus.ACTIVE);   // un email @esprit.tn ouvre la boutique directement
+        // Toute adresse e-mail contenant '@' active la boutique directement
+        shop.setStatus(ShopStatus.ACTIVE);
         Shop saved = repository.save(shop);
+        log.info("[ASYNC] Boutique creee id={}, email={}, status={}", saved.getId(), saved.getOwnerEmail(), saved.getStatus());
         producer.shopCreated(saved.getOwnerEmail(), saved.getName(), saved.getStatus());
+        log.info("[ASYNC] Message 'shop.created' publie dans RabbitMQ pour {}", saved.getOwnerEmail());
         return toResponse(saved);
     }
 

@@ -47,6 +47,9 @@ public class GatewayRoutes {
                 .route("marketplace-mic2-categories", r -> r.path("/mic2/categories/**")
                         .uri("lb://marketplace"))
 
+                .route("marketplace-mic2-paniers", r -> r.path("/mic2/paniers/**")
+                        .uri("lb://marketplace"))
+
                 .route("delivery", r -> r.path("/delivery/**")
                         .uri("lb://DELIVERY"))
                  

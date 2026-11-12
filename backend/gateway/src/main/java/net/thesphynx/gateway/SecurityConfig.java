@@ -40,6 +40,8 @@ public class SecurityConfig {
                         // Compte utilisateur
                         .pathMatchers(HttpMethod.POST, "/user/register").permitAll()
                         .pathMatchers("/user/health").permitAll()
+                        // Panier : propre à chaque utilisateur, jamais public
+                        .pathMatchers("/mic2/paniers/**").authenticated()
                         // Catalogue public en lecture
                         .pathMatchers(HttpMethod.GET, "/srv/**", "/mic2/**", "/mic1/events/**",
                                 "/patnership/api/partnership/companies/**",

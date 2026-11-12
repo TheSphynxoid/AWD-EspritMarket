@@ -28,8 +28,8 @@ public class Panier {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private Long userId;
+    @Column(nullable = false, unique = true, length = 64)
+    private String userId;   // identifiant Keycloak (sub)
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
