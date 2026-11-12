@@ -12,7 +12,7 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   register(username: string, email: string, password: string): Observable<any> {
-    return this.http.post('http://localhost:8088/user/register', {
+    return this.http.post('/gw/user/register', {
       username,
       email,
       password,
@@ -55,7 +55,7 @@ export class AuthService {
     body.set('password', password);
 
     return this.http
-      .post('http://localhost:8180/realms/espritmarket/protocol/openid-connect/token', body.toString(), {
+      .post('/auth/realms/espritmarket/protocol/openid-connect/token', body.toString(), {
         headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' }),
       })
       .pipe(

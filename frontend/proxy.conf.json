@@ -1,0 +1,14 @@
+{
+  "/gw": {
+    "target": "http://localhost:8088",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/gw": "" }
+  },
+  "/auth": {
+    "target": "http://localhost:8180",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/auth": "" }
+  }
+}

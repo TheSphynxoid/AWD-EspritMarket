@@ -19,6 +19,6 @@ export class ProfileComponent implements OnInit {
   data: any = null;
 
   ngOnInit(): void {
-    this.http.get('http://localhost:8088/user/me').subscribe({ next: (d) => (this.data = d) });
+    this.http.get('/gw/user/me').subscribe({ next: (d) => (this.data = d) });
   }
 }

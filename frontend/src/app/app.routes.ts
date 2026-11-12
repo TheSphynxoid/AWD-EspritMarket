@@ -27,6 +27,7 @@ export const routes: Routes = [
   { path: 'tickets', component: TicketsComponent, canActivate: [authGuard] },
   {
     path: 'delivery',
+    canActivate: [authGuard],
     loadChildren: () => import('./features/delivery/delivery.routes').then((m) => m.DELIVERY_ROUTES),
   },
   {
