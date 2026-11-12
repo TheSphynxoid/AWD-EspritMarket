@@ -16,12 +16,12 @@ notifications: list[dict] = []
 _pending: list[dict] = []
 _lock = threading.Lock()
 
-
 class NotificationIn(BaseModel):
     recipient: str
     message: str
     type: str = "info"
 
+#send_email() envoie l’email (ou log si SMTP non configuré).
 
 def handle_message(notification: dict) -> None:
     send_email(notification)
