@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from eureka import deregister, start_registration
-from rabbitmq import QUEUE_NAME, consume, publish, send_email
+from rabbitmq import QUEUE_NAME, consume, email_mode, publish, send_email
 
 APP_NAME = os.getenv("APP_NAME", "NOTIFICATION")
 PORT = int(os.getenv("PORT", "8090"))
@@ -33,6 +33,7 @@ def handle_message(notification: dict) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     stop_event = threading.Event()
+    print(f"[notification] email mode: {email_mode()}", flush=True)
     start_registration(stop_event)
     app.state.stop_event = stop_event
 
@@ -65,7 +66,7 @@ app = FastAPI(title="Notification Service", lifespan=lifespan)
 
 @app.get("/health")
 def health():
-    return {"status": "UP", "service": APP_NAME, "queue": QUEUE_NAME}
+    return {"status": "UP", "service": APP_NAME, "queue": QUEUE_NAME, "email": email_mode()}
 
 
 @app.get("/notification")
