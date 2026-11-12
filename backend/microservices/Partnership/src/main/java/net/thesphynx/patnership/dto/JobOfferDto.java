@@ -3,6 +3,8 @@ package net.thesphynx.patnership.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDate;
+
 public class JobOfferDto {
 
     private Long id;
@@ -17,6 +19,12 @@ public class JobOfferDto {
 
     @NotNull(message = "L'entreprise partenaire est obligatoire")
     private Long companyId;
+
+    // --- Event enrichment fields (populated via Feign call) ---
+    private Long eventId;
+    private String eventName;
+    private LocalDate eventDate;
+    private String eventLocation;
 
     public JobOfferDto() {
     }
@@ -52,4 +60,16 @@ public class JobOfferDto {
 
     public Long getCompanyId() { return companyId; }
     public void setCompanyId(Long companyId) { this.companyId = companyId; }
+
+    public Long getEventId() { return eventId; }
+    public void setEventId(Long eventId) { this.eventId = eventId; }
+
+    public String getEventName() { return eventName; }
+    public void setEventName(String eventName) { this.eventName = eventName; }
+
+    public LocalDate getEventDate() { return eventDate; }
+    public void setEventDate(LocalDate eventDate) { this.eventDate = eventDate; }
+
+    public String getEventLocation() { return eventLocation; }
+    public void setEventLocation(String eventLocation) { this.eventLocation = eventLocation; }
 }
