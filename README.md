@@ -53,8 +53,6 @@ Navigateur ──► frontend (nginx, Angular)
 - **Keycloak** : realm `espritmarket` importé depuis [`keycloak/espritmarket-realm.json`](keycloak/espritmarket-realm.json)
   (client public `user-service`, rôle `ADMIN_DELIVERY`).
 - **Communication** : synchrone (OpenFeign, marketplace → delivery) et asynchrone (RabbitMQ → Notification).
-  Détails : [`documentation/validation-communications.md`](documentation/validation-communications.md),
-  [`documentation/communication-marketplace-delivery.md`](documentation/communication-marketplace-delivery.md).
 
 ### Services
 
@@ -196,7 +194,7 @@ backend/
   gateway/              Spring Cloud Gateway (sécurité JWT, routes, Swagger centralisé)
   microservices/        SRV, marketplace, Delivery, Event, Partnership, User, Notification
 deploy/                 Docker Compose de production, .env.example, init PostgreSQL, Prometheus
-documentation/          diagrammes d'architecture et notes de communication inter-services
+documentation/          diagrammes d'architecture (PlantUML + PNG)
 frontend/               application Angular (+ nginx.conf et Dockerfile de production)
 keycloak/               realm espritmarket importé au démarrage de Keycloak
 docker-compose.yml      infrastructure de développement local (Keycloak + RabbitMQ)
