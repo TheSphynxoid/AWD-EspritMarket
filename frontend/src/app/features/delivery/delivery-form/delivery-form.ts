@@ -18,12 +18,20 @@ import { Delivery, DeliveryType, Product, TYPE_LABELS, apiError } from '../deliv
           <h2 class="font-semibold text-lg">Produit à livrer</h2>
           @if (productsError()) {
             <p class="text-amber-700 bg-amber-50 rounded p-3 text-sm">{{ productsError() }}</p>
+          } @else if (!productsLoading() && !hasAvailableProduct()) {
+            <p class="text-amber-700 bg-amber-50 rounded p-3 text-sm">
+              Aucun produit disponible en stock pour le moment.
+            </p>
           }
           <select [(ngModel)]="model.productId" (ngModelChange)="productId.set($event)" name="productId" required
                   class="w-full border rounded px-3 py-2 bg-white">
             <option [ngValue]="null" disabled>Choisir un produit de la marketplace</option>
             @for (p of selectableProducts(); track p.id) {
-              <option [ngValue]="p.id">{{ p.name }} · {{ p.shopName }} · {{ p.price }} TND (stock {{ p.stock }})</option>
+              <option [ngValue]="p.id" [disabled]="!isAvailable(p) && p.id !== productId()"
+                      [class.text-slate-400]="!isAvailable(p)">
+                {{ p.name }} · {{ p.shopName }} · {{ p.price }} TND
+                @if (isAvailable(p)) { (stock {{ p.stock }}) } @else { — Rupture de stock }
+              </option>
             }
           </select>
           @if (selectedProduct(); as p) {
@@ -133,11 +141,21 @@ export class DeliveryFormComponent implements OnInit {
   productsError = signal<string | null>(null);
   error = signal<string | null>(null);
   saving = signal(false);
+  productsLoading = signal(true);
 
-  /** Produits actifs et en stock, plus le produit actuel en modification. */
+  /**
+   * Produits actifs (en stock ou en rupture), plus le produit actuel en modification.
+   * Les produits en rupture sont affichés grisés et non sélectionnables ;
+   * le backend revérifie le stock en synchrone (409 si indisponible).
+   */
   selectableProducts = computed(() =>
-    this.products().filter((p) => (p.active && p.stock > 0) || p.id === this.productId()),
+    this.products().filter((p) => p.active || p.id === this.productId()),
   );
+  hasAvailableProduct = computed(() => this.products().some((p) => this.isAvailable(p)));
+
+  isAvailable(p: Product): boolean {
+    return p.active && p.stock > 0;
+  }
   selectedProduct = computed(() => this.products().find((p) => p.id === this.productId()) ?? null);
 
   ngOnInit(): void {
@@ -158,8 +176,14 @@ export class DeliveryFormComponent implements OnInit {
       error: () => {},
     });
     this.api.listProducts().subscribe({
-      next: (list) => this.products.set(list ?? []),
-      error: () => this.productsError.set('Impossible de charger les produits : le microservice marketplace est-il démarré ?'),
+      next: (list) => {
+        this.products.set(list ?? []);
+        this.productsLoading.set(false);
+      },
+      error: () => {
+        this.productsError.set('Impossible de charger les produits : le microservice marketplace est-il démarré ?');
+        this.productsLoading.set(false);
+      },
     });
   }
 
