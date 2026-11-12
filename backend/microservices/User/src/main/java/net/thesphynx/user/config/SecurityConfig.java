@@ -19,7 +19,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(request -> request.getRequestURI().equals("/user/health")
                         || request.getRequestURI().equals("/user/register")
-                        || request.getRequestURI().startsWith("/actuator/")).permitAll()
+                        || request.getRequestURI().startsWith("/actuator/")
+                        || request.getRequestURI().startsWith("/v3/api-docs")
+                        // Sinon toute erreur (400, 500...) est masquée par un 401 sur /error
+                        || request.getRequestURI().equals("/error")).permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}));

@@ -60,7 +60,13 @@ public class GatewayRoutes {
                 .route("event-mic1", r -> r.path("/mic1/**")
                         .uri("lb://EVENT"))
 
+                .route("marketplace-mic2-deliveries", r -> r.path("/mic2/deliveries/**")
+                        .uri("lb://marketplace"))
+
                 .route("patnership", r -> r.path("/patnership/**")
+                        .uri("lb://PATNERSHIP"))
+
+                .route("patnership-api", r -> r.path("/api/partnership/**")
                         .uri("lb://PATNERSHIP"))
 
                 .route("user", r -> r.path("/user/**")
@@ -68,6 +74,20 @@ public class GatewayRoutes {
 
                 .route("notification", r -> r.path("/notification/**")
                         .uri("lb://NOTIFICATION"))
+
+                // Swagger centralisé : /docs/{service} -> /v3/api-docs du microservice
+                .route("docs-srv", r -> r.path("/docs/srv")
+                        .filters(f -> f.setPath("/v3/api-docs")).uri("lb://SRV"))
+                .route("docs-marketplace", r -> r.path("/docs/marketplace")
+                        .filters(f -> f.setPath("/v3/api-docs")).uri("lb://MARKETPLACE"))
+                .route("docs-delivery", r -> r.path("/docs/delivery")
+                        .filters(f -> f.setPath("/v3/api-docs")).uri("lb://DELIVERY"))
+                .route("docs-event", r -> r.path("/docs/event")
+                        .filters(f -> f.setPath("/v3/api-docs")).uri("lb://EVENT"))
+                .route("docs-partnership", r -> r.path("/docs/partnership")
+                        .filters(f -> f.setPath("/v3/api-docs")).uri("lb://PATNERSHIP"))
+                .route("docs-user", r -> r.path("/docs/user")
+                        .filters(f -> f.setPath("/v3/api-docs")).uri("lb://USER"))
 
                 .build();
     }
