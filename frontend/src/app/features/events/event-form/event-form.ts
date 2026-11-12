@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EventItem, EventService } from '../../../core/services/event.service';
@@ -107,6 +107,8 @@ export class EventFormComponent implements OnInit {
   private service = inject(EventService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  // Application sans zone.js : redessiner après le chargement de l'événement à modifier
+  private cdr = inject(ChangeDetectorRef);
 
   isEdit = false;
   id: number | null = null;
@@ -133,7 +135,10 @@ export class EventFormComponent implements OnInit {
       this.isEdit = true;
       this.id = Number(param);
       this.service.get(this.id).subscribe({
-        next: (e) => (this.model = e),
+        next: (e) => {
+          this.model = e;
+          this.cdr.markForCheck();
+        },
         error: () => {},
       });
     }
