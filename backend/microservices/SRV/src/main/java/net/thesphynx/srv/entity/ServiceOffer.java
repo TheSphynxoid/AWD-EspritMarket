@@ -30,19 +30,39 @@ public class ServiceOffer {
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
 
-    private String status;
+    /** Durée indicative de la prestation, en minutes. */
+    private Integer durationMinutes;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private ServiceMode mode;
+
+    /** Ville / lieu (sur place). */
+    private String location;
+
+    @Column(length = 1000)
+    private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private ServiceStatus status;
+
+    /** Prestataire : identifiant Keycloak (sub), nom affiché et email (notifications). */
     private String providerId;
+    private String providerName;
+    private String providerEmail;
 
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @PrePersist
     public void prePersist() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-        if (status == null) {
-            status = "ACTIVE";
-        }
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (status == null) status = ServiceStatus.ACTIVE;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

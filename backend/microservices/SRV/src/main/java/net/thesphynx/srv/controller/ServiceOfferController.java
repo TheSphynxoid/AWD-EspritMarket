@@ -1,11 +1,17 @@
 package net.thesphynx.srv.controller;
 
 import jakarta.validation.Valid;
-import net.thesphynx.srv.entity.ServiceOffer;
+import net.thesphynx.srv.dto.ServiceRequest;
+import net.thesphynx.srv.dto.ServiceResponse;
+import net.thesphynx.srv.security.CurrentUser;
 import net.thesphynx.srv.service.ServiceOfferService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -18,34 +24,45 @@ public class ServiceOfferController {
         this.service = service;
     }
 
+    /** Catalogue public : ?q=texte&category=...&minPrice=...&maxPrice=... */
     @GetMapping
-    public List<ServiceOffer> list() {
-        return service.findAll();
+    public List<ServiceResponse> list(@RequestParam(required = false) String q,
+                                      @RequestParam(required = false) String category,
+                                      @RequestParam(required = false) BigDecimal minPrice,
+                                      @RequestParam(required = false) BigDecimal maxPrice) {
+        return service.search(q, category, minPrice, maxPrice);
+    }
+
+    @GetMapping("/categories")
+    public List<String> categories() {
+        return service.categories();
+    }
+
+    /** Services du prestataire connecté (y compris en pause). */
+    @GetMapping("/mine")
+    public List<ServiceResponse> mine(@AuthenticationPrincipal Jwt jwt) {
+        return service.mine(CurrentUser.from(jwt));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceOffer> get(@PathVariable Long id) {
-        return service.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ServiceResponse get(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return service.get(id, jwt != null ? CurrentUser.from(jwt) : null);
     }
 
     @PostMapping
-    public ResponseEntity<ServiceOffer> create(@Valid @RequestBody ServiceOffer offer) {
-        return ResponseEntity.ok(service.create(offer));
+    public ResponseEntity<ServiceResponse> create(@Valid @RequestBody ServiceRequest req, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(req, CurrentUser.from(jwt)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceOffer> update(@PathVariable Long id, @Valid @RequestBody ServiceOffer offer) {
-        return service.update(id, offer)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ServiceResponse update(@PathVariable Long id, @Valid @RequestBody ServiceRequest req,
+                                  @AuthenticationPrincipal Jwt jwt) {
+        return service.update(id, req, CurrentUser.from(jwt));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        return service.delete(id)
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.notFound().build();
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        service.delete(id, CurrentUser.from(jwt));
+        return ResponseEntity.noContent().build();
     }
 }

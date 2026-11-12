@@ -5,7 +5,6 @@ import { RegisterComponent } from './features/auth/register/register';
 import { ProfileComponent } from './features/profile/profile';
 import { ServiceListComponent } from './features/services/service-list/service-list';
 import { ServiceDetailComponent } from './features/services/service-detail/service-detail';
-import { ServiceNewComponent } from './features/services/service-new/service-new';
 import { RoleSelectComponent } from './features/role-select/role-select';
 import { EventListComponent } from './features/events/event-list/event-list';
 import { EventDetailComponent } from './features/events/event-detail/event-detail';
@@ -31,7 +30,11 @@ export const routes: Routes = [
   { path: 'role-select', component: RoleSelectComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'services', component: ServiceListComponent },
-  { path: 'services/new', component: ServiceNewComponent, canActivate: [authGuard] },
+  { path: 'services/new', loadComponent: () => import('./features/services/service-new/service-new').then((m) => m.ServiceNewComponent), canActivate: [authGuard] },
+  { path: 'services/mine', loadComponent: () => import('./features/services/my-services/my-services').then((m) => m.MyServicesComponent), canActivate: [authGuard] },
+  { path: 'services/bookings', loadComponent: () => import('./features/services/my-bookings/my-bookings').then((m) => m.MyBookingsComponent), canActivate: [authGuard] },
+  { path: 'services/received', loadComponent: () => import('./features/services/received-bookings/received-bookings').then((m) => m.ReceivedBookingsComponent), canActivate: [authGuard] },
+  { path: 'services/:id/edit', loadComponent: () => import('./features/services/service-new/service-new').then((m) => m.ServiceNewComponent), canActivate: [authGuard] },
   { path: 'services/:id', component: ServiceDetailComponent },
   { path: 'events', component: EventListComponent, canActivate: [authGuard] },
   { path: 'events/new', component: EventFormComponent, canActivate: [authGuard] },

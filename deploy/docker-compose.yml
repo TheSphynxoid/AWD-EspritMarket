@@ -121,6 +121,7 @@ services:
     environment:
       <<: *spring-env
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/srv_db
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
     depends_on: &db-deps
       discovery:
         condition: service_started

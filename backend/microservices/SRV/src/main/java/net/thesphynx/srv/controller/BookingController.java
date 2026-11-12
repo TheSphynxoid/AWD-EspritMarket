@@ -1,41 +1,58 @@
 package net.thesphynx.srv.controller;
 
-import net.thesphynx.srv.entity.Booking;
+import jakarta.validation.Valid;
+import net.thesphynx.srv.dto.BookingRequest;
+import net.thesphynx.srv.dto.BookingResponse;
+import net.thesphynx.srv.dto.BookingStatusRequest;
+import net.thesphynx.srv.entity.BookingStatus;
+import net.thesphynx.srv.security.CurrentUser;
 import net.thesphynx.srv.service.BookingService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/** Toutes les routes exigent un JWT : le client / prestataire est l'utilisateur connecté. */
 @RestController
 @RequestMapping("/srv/bookings")
 public class BookingController {
 
-    private final BookingService bookingService;
+    private final BookingService bookings;
 
-    public BookingController(BookingService bookingService) {
-        this.bookingService = bookingService;
+    public BookingController(BookingService bookings) {
+        this.bookings = bookings;
     }
 
     @PostMapping
-    public ResponseEntity<Booking> create(@RequestParam Long serviceId,
-                                          @RequestParam String bookerId) {
-        return ResponseEntity.ok(bookingService.create(serviceId, bookerId));
+    public ResponseEntity<BookingResponse> create(@Valid @RequestBody BookingRequest req, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookings.create(req, CurrentUser.from(jwt)));
     }
 
-    @GetMapping
-    public List<Booking> list(@RequestParam(required = false) String bookerId,
-                              @RequestParam(required = false) String providerId) {
-        if (bookerId != null) return bookingService.findByBooker(bookerId);
-        if (providerId != null) return bookingService.findByProvider(providerId);
-        return List.of();
+    /** Réservations faites par l'utilisateur connecté (côté client). */
+    @GetMapping("/mine")
+    public List<BookingResponse> mine(@AuthenticationPrincipal Jwt jwt) {
+        return bookings.mine(CurrentUser.from(jwt));
     }
 
-    @PutMapping("/{id}/status")
-    public ResponseEntity<Booking> updateStatus(@PathVariable Long id,
-                                                @RequestParam String status) {
-        return bookingService.updateStatus(id, status)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    /** Réservations reçues sur ses services (côté prestataire), filtre optionnel ?status=PENDING */
+    @GetMapping("/received")
+    public List<BookingResponse> received(@RequestParam(required = false) BookingStatus status,
+                                          @AuthenticationPrincipal Jwt jwt) {
+        return bookings.received(CurrentUser.from(jwt), status);
+    }
+
+    @GetMapping("/{id}")
+    public BookingResponse get(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return bookings.get(id, CurrentUser.from(jwt));
+    }
+
+    /** { "status": "ACCEPTED" | "DECLINED" | "COMPLETED" | "CANCELLED", "note": "..." } */
+    @PatchMapping("/{id}/status")
+    public BookingResponse changeStatus(@PathVariable Long id, @Valid @RequestBody BookingStatusRequest req,
+                                        @AuthenticationPrincipal Jwt jwt) {
+        return bookings.changeStatus(id, req, CurrentUser.from(jwt));
     }
 }
