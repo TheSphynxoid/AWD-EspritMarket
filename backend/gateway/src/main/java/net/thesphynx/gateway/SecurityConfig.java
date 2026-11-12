@@ -41,7 +41,9 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/user/register").permitAll()
                         .pathMatchers("/user/health").permitAll()
                         // Catalogue public en lecture
-                        .pathMatchers(HttpMethod.GET, "/srv/**", "/mic2/**", "/mic1/events/**").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/srv/**", "/mic2/**", "/mic1/events/**",
+                                "/patnership/api/partnership/companies/**",
+                                "/patnership/api/partnership/job-offers/**").permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .build();

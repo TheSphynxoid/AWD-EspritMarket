@@ -48,6 +48,6 @@ export const routes: Routes = [
   { path: 'partnership/companies', component: CompanyListComponent },
   { path: 'partnership/job-offers', component: JobOfferListComponent },
   { path: 'partnership/job-offers/:id', component: JobOfferDetailComponent },
-  { path: 'partnership/applications', component: ApplicationListComponent },
-  { path: 'partnership/interviews', component: InterviewListComponent },
+  { path: 'partnership/applications', component: ApplicationListComponent, canActivate: [authGuard] },
+  { path: 'partnership/interviews', component: InterviewListComponent, canActivate: [authGuard] },
 ];
