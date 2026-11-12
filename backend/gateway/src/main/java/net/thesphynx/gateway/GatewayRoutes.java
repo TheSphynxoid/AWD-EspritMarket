@@ -64,6 +64,7 @@ public class GatewayRoutes {
                         .uri("lb://marketplace"))
 
                 .route("patnership", r -> r.path("/patnership/**")
+                        .filters(f -> f.stripPrefix(1))
                         .uri("lb://PATNERSHIP"))
 
                 .route("patnership-api", r -> r.path("/api/partnership/**")
