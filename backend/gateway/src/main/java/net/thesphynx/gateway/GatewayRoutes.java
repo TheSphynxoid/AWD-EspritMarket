@@ -39,21 +39,25 @@ public class GatewayRoutes {
                         .uri("lb://MARKETPLACE"))
 
                 .route("marketplace-mic2-shops", r -> r.path("/mic2/shops/**")
-                        .uri("lb://MARKETPLACE"))
+                        .uri("lb://marketplace"))
 
                 .route("marketplace-mic2-products", r -> r.path("/mic2/products/**")
-                        .uri("lb://MARKETPLACE"))
+                        .uri("lb://marketplace"))
 
                 .route("marketplace-mic2-categories", r -> r.path("/mic2/categories/**")
-                        .uri("lb://MARKETPLACE"))
+                        .uri("lb://marketplace"))
 
                 .route("delivery", r -> r.path("/delivery/**")
                         .uri("lb://DELIVERY"))
-
+                 
                 .route("delivery-api", r -> r.path("/api/deliveries/**", "/api/deliverers/**", "/api/vehicles/**")
                         .uri("lb://DELIVERY"))
 
                 .route("event", r -> r.path("/event/**")
+                        .filters(f -> f.stripPrefix(1))
+                        .uri("lb://EVENT"))
+
+                .route("event-mic1", r -> r.path("/mic1/**")
                         .uri("lb://EVENT"))
 
                 .route("patnership", r -> r.path("/patnership/**")
