@@ -1,0 +1,63 @@
+// Architecture physique (déploiement Docker) — EspritMarket
+// Eraser (app.eraser.io) : nouveau diagramme "Cloud architecture", coller ce code, exporter en PNG
+// sous documentation/diag/architecture-physique.png
+
+title Architecture physique (déploiement Docker) — EspritMarket
+direction down
+colorMode pastel
+styleMode shadow
+typeface clean
+
+Navigateur [icon: user]
+Cloudflare [icon: cloudflare, label: "Tunnel Cloudflare (optionnel)"]
+GitHub Actions [icon: github, label: "GitHub Actions → GHCR"]
+Mailtrap [icon: mail]
+
+Serveur docker compose [icon: docker] {
+  frontend [icon: nginx, color: green, label: "frontend (nginx) — publié :8280"]
+  keycloak [icon: key, color: orange, label: "keycloak 24 — publié :8281"]
+  prometheus [icon: prometheus, color: purple, label: "prometheus — publié :9095"]
+
+  Réseau interne backend [color: blue] {
+    gateway [icon: server, label: "gateway :8088"]
+    discovery [icon: compass, label: "discovery (Eureka) :8761"]
+
+    Microservices [color: teal] {
+      srv [icon: tool, label: "srv :8082"]
+      marketplace [icon: shopping-cart, label: "marketplace :8083"]
+      delivery [icon: truck, label: "delivery :8084"]
+      event [icon: calendar, label: "event :8085"]
+      user [icon: users, label: "user :8087"]
+      partnership [icon: briefcase, label: "partnership :8089"]
+    }
+
+    rabbitmq [icon: rabbitmq, label: "rabbitmq :5672"]
+    notification [icon: python, label: "notification :8090"]
+    postgres [icon: postgres, label: "postgres 16 :5432 (6 bases)"]
+  }
+}
+
+// Entrée
+Navigateur > Cloudflare: HTTPS
+Cloudflare > frontend: HTTP
+frontend > gateway: /gw/**
+frontend > keycloak: /auth/**
+GitHub Actions --> Serveur docker compose: docker compose pull
+
+// Routage
+gateway --> discovery: découverte (lb)
+gateway > Microservices
+prometheus --> discovery: cibles /actuator/prometheus
+
+// Données
+Microservices > postgres: JDBC
+keycloak > postgres: JDBC
+
+// Notifications : les 5 services qui publient
+srv > rabbitmq
+marketplace > rabbitmq
+delivery > rabbitmq
+event > rabbitmq
+partnership > rabbitmq
+rabbitmq > notification: AMQP
+notification > Mailtrap: SMTP

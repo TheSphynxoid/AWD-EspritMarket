@@ -34,7 +34,7 @@ Démo en ligne : <https://micro.thesphynx.net>
 
 ![Architecture physique](documentation/diag/architecture-physique.png)
 
-> Sources PlantUML : [`documentation/diag/`](documentation/diag/)
+> Sources : fichiers [Eraser](https://www.eraser.io) `*.eraser` dans [`documentation/diag/`](documentation/diag/) (à coller dans un diagramme « Cloud architecture », puis exporter en PNG)
 
 ### Flux d'une requête
 
@@ -194,7 +194,7 @@ backend/
   gateway/              Spring Cloud Gateway (sécurité JWT, routes, Swagger centralisé)
   microservices/        SRV, marketplace, Delivery, Event, Partnership, User, Notification
 deploy/                 Docker Compose de production, .env.example, init PostgreSQL, Prometheus
-documentation/          diagrammes d'architecture (PlantUML + PNG)
+documentation/          diagrammes d'architecture (sources Eraser + PNG)
 frontend/               application Angular (+ nginx.conf et Dockerfile de production)
 keycloak/               realm espritmarket importé au démarrage de Keycloak
 docker-compose.yml      infrastructure de développement local (Keycloak + RabbitMQ)

@@ -1,0 +1,68 @@
+// Architecture logique — EspritMarket
+// Eraser (app.eraser.io) : nouveau diagramme "Cloud architecture", coller ce code, exporter en PNG
+// sous documentation/diag/architecture-logique.png
+
+title Architecture logique — EspritMarket
+direction down
+colorMode pastel
+styleMode shadow
+typeface clean
+
+Utilisateur [icon: user, label: "Utilisateur (navigateur)"]
+Frontend [icon: angular, color: green, label: "Frontend Angular"]
+Keycloak [icon: key, color: orange, label: "Keycloak (OAuth2 / JWT)"]
+Gateway [icon: server, color: gray, label: "API Gateway"]
+Eureka [icon: compass, color: gray, label: "Eureka (annuaire)"]
+
+Microservices [color: teal] {
+  SRV [icon: tool, label: "SRV — services, réservations"]
+  Marketplace [icon: shopping-cart, label: "Marketplace — boutiques, panier"]
+  Delivery [icon: truck, label: "Delivery — livraisons"]
+  Event [icon: calendar, label: "Event — événements, billets"]
+  Partnership [icon: briefcase, label: "Partnership — entreprises, offres"]
+  User [icon: users, label: "User — comptes, profil"]
+}
+
+PostgreSQL [icon: postgres, color: orange] {
+  srv_db [icon: database]
+  marketplace_db [icon: database]
+  delivery_db [icon: database]
+  event_db [icon: database]
+  partnership_db [icon: database]
+}
+
+Messagerie [color: blue] {
+  RabbitMQ [icon: rabbitmq, label: "RabbitMQ (file notifications)"]
+  Notification [icon: python, label: "Notification (FastAPI)"]
+}
+Mailtrap [icon: mail, label: "Mailtrap (SMTP / API)"]
+
+// Accès utilisateur et sécurité
+Utilisateur > Frontend: HTTPS
+Frontend > Keycloak: connexion
+Frontend > Gateway: REST + JWT
+Gateway --> Keycloak: clés publiques (JWK)
+Gateway --> Eureka: découverte
+Microservices --> Eureka: enregistrement
+Gateway > Microservices: routage via Eureka (lb)
+User --> Keycloak: création des comptes
+
+// Appels synchrones (OpenFeign)
+Marketplace <> Delivery: Feign
+Partnership > Event: Feign
+
+// Persistance (une base par service)
+SRV > srv_db
+Marketplace > marketplace_db
+Delivery > delivery_db
+Event > event_db
+Partnership > partnership_db
+
+// Asynchrone : les 5 services publient dans la même file
+SRV > RabbitMQ: publication
+Marketplace > RabbitMQ
+Delivery > RabbitMQ
+Event > RabbitMQ
+Partnership > RabbitMQ
+RabbitMQ > Notification: consommation
+Notification > Mailtrap: email
