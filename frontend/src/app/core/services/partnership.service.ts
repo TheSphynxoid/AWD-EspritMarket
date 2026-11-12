@@ -14,7 +14,7 @@ export interface PartnerCompany {
   phone?: string;
 }
 
-// ── Job Offer (enriched by Feign with event data) ──
+// ── Job Offer (enriched with event data) ──
 export interface JobOffer {
   id?: number;
   title: string;
@@ -24,7 +24,7 @@ export interface JobOffer {
   status?: string;
   companyId: number;
   eventId?: number | null;
-  // Feign-enriched fields (read-only, populated by backend)
+  // Event fields (read-only, populated by backend)
   eventName?: string | null;
   eventDate?: string | null;
   eventLocation?: string | null;

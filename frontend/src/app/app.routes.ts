@@ -43,11 +43,11 @@ export const routes: Routes = [
       import('./features/admin-delivery/admin-delivery.routes').then((m) => m.ADMIN_DELIVERY_ROUTES),
   },
 
-  // ── Partnership routes (no auth guard for easy testing) ──
+  // ── Partnership routes (gateway exige un JWT) ──
   { path: 'partnership', redirectTo: 'partnership/companies', pathMatch: 'full' },
-  { path: 'partnership/companies', component: CompanyListComponent },
-  { path: 'partnership/job-offers', component: JobOfferListComponent },
-  { path: 'partnership/job-offers/:id', component: JobOfferDetailComponent },
-  { path: 'partnership/applications', component: ApplicationListComponent },
-  { path: 'partnership/interviews', component: InterviewListComponent },
+  { path: 'partnership/companies', component: CompanyListComponent, canActivate: [authGuard] },
+  { path: 'partnership/job-offers', component: JobOfferListComponent, canActivate: [authGuard] },
+  { path: 'partnership/job-offers/:id', component: JobOfferDetailComponent, canActivate: [authGuard] },
+  { path: 'partnership/applications', component: ApplicationListComponent, canActivate: [authGuard] },
+  { path: 'partnership/interviews', component: InterviewListComponent, canActivate: [authGuard] },
 ];

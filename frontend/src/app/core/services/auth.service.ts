@@ -5,9 +5,7 @@ import { Observable, tap } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly tokenKey = 'access_token';
-  readonly isAuthenticated = signal<boolean>(
-    typeof localStorage !== 'undefined' && !!localStorage.getItem(this.tokenKey)
-  );
+  readonly isAuthenticated = signal<boolean>(this.readValidToken() !== null);
 
   constructor(private http: HttpClient) {}
 
@@ -20,8 +18,27 @@ export class AuthService {
   }
 
   get token(): string | null {
+    const t = this.readValidToken();
+    if (!t && this.isAuthenticated()) this.logout();
+    return t;
+  }
+
+  /** Token stocké, ou null s'il est absent / expiré (le token Keycloak dure peu). */
+  private readValidToken(): string | null {
     if (typeof localStorage === 'undefined') return null;
-    return localStorage.getItem(this.tokenKey);
+    const t = localStorage.getItem(this.tokenKey);
+    if (!t) return null;
+    try {
+      const b64 = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const exp = JSON.parse(atob(b64.padEnd(Math.ceil(b64.length / 4) * 4, '='))).exp;
+      if (typeof exp === 'number' && exp * 1000 <= Date.now()) {
+        localStorage.removeItem(this.tokenKey);
+        return null;
+      }
+    } catch {
+      return null;
+    }
+    return t;
   }
 
   get userId(): string | null {

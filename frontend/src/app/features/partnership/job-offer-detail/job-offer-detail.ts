@@ -43,8 +43,8 @@ import { JobOffer, PartnershipService } from '../../../core/services/partnership
                   <p class="text-slate-800 mt-1">{{ offer()!.location || '—' }}</p>
                 </div>
                 <div>
-                  <span class="text-slate-500 font-medium">🏢 Company ID</span>
-                  <p class="text-slate-800 mt-1">{{ offer()!.companyId }}</p>
+                  <span class="text-slate-500 font-medium">🏢 Entreprise</span>
+                  <p class="text-slate-800 mt-1">{{ companyName() || '—' }}</p>
                 </div>
               </div>
 
@@ -56,30 +56,19 @@ import { JobOffer, PartnershipService } from '../../../core/services/partnership
                 </div>
               }
 
-              <!-- ⭐ FEIGN ENRICHMENT SECTION -->
+              <!-- Linked event -->
               <div class="border-t pt-6">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                   🔗 Événement lié
-                  <span class="text-xs font-normal text-slate-400">(via OpenFeign → Event Service)</span>
                 </h3>
 
                 @if (!offer()!.eventId) {
                   <!-- No event linked -->
                   <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-center">
                     <p class="text-slate-500">Aucun événement lié à cette offre.</p>
-                    <p class="text-xs text-slate-400 mt-1">Assignez un <code class="bg-slate-200 px-1 rounded">eventId</code> pour activer la communication Feign.</p>
                   </div>
                 } @else if (offer()!.eventName) {
-                  <!-- ✅ Event data fetched successfully via Feign -->
                   <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
-                    <div class="flex items-center justify-between mb-3">
-                      <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">
-                        ✅ Données récupérées via Feign
-                      </span>
-                      <span class="text-xs text-emerald-600 font-mono">
-                        eventId: {{ offer()!.eventId }}
-                      </span>
-                    </div>
                     <div class="space-y-3">
                       <div class="flex items-center gap-3">
                         <span class="text-2xl">📅</span>
@@ -98,29 +87,11 @@ import { JobOffer, PartnershipService } from '../../../core/services/partnership
                         </div>
                       </div>
                     </div>
-                    <div class="mt-4 p-3 bg-emerald-100/50 rounded-lg">
-                      <p class="text-xs text-emerald-700 font-mono leading-relaxed">
-                        Partnership:8089 → Feign @FeignClient(name="event") → Eureka → Event:8085 → GET /mic1/events/{{ offer()!.eventId }}
-                      </p>
-                    </div>
                   </div>
                 } @else {
-                  <!-- ⚠️ Event ID set but no data returned (service down / not found) -->
                   <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
-                    <div class="flex items-center justify-between mb-3">
-                      <span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">
-                        ⚠️ Event service indisponible
-                      </span>
-                      <span class="text-xs text-amber-600 font-mono">
-                        eventId: {{ offer()!.eventId }}
-                      </span>
-                    </div>
                     <p class="text-amber-800 text-sm">
-                      L'offre est liée à l'événement <strong>#{{ offer()!.eventId }}</strong>, mais le service Event
-                      n'a pas pu être contacté (FeignException → dégradation gracieuse).
-                    </p>
-                    <p class="text-xs text-amber-600 mt-2">
-                      Vérifiez que le microservice Event (port 8085) est bien démarré et enregistré dans Eureka.
+                      Les informations de l'événement lié sont momentanément indisponibles.
                     </p>
                   </div>
                 }
@@ -149,6 +120,7 @@ export class JobOfferDetailComponent implements OnInit {
   offer = signal<JobOffer | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
+  companyName = signal<string | null>(null);
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -161,6 +133,12 @@ export class JobOfferDetailComponent implements OnInit {
       next: (data) => {
         this.offer.set(data);
         this.loading.set(false);
+        if (data?.companyId) {
+          this.service.getCompany(data.companyId).subscribe({
+            next: (c) => this.companyName.set(c?.name ?? null),
+            error: () => {},
+          });
+        }
       },
       error: () => {
         this.error.set("Impossible de charger l'offre d'emploi");
