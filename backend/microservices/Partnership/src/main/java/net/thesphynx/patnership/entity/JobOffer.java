@@ -24,6 +24,13 @@ public class JobOffer {
 
     private String status;
 
+    /**
+     * Foreign key referencing an Event in the Event microservice.
+     * No JPA relationship — just a bare ID for inter-service lookup via Feign.
+     */
+    @Column(name = "event_id")
+    private Long eventId;
+
     @ManyToOne
     @JoinColumn(name = "company_id")
     private PartnerCompany company;
@@ -87,6 +94,14 @@ public class JobOffer {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Long getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(Long eventId) {
+        this.eventId = eventId;
     }
 
     public PartnerCompany getCompany() {

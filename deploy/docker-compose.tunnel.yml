@@ -1,0 +1,11 @@
+# Option : publie aussi le frontend sur 127.0.0.1 pour un tunnel local
+# (ex. cloudflared sur la même machine, route -> http://localhost:8280).
+#
+# Activer dans .env :  COMPOSE_FILE=docker-compose.yml:docker-compose.tunnel.yml
+#
+# Seul le frontend est concerné : il sert l'app, /gw (gateway) et /auth (Keycloak)
+# sur la même origine, donc le tunnel n'a besoin que de ce port.
+services:
+  frontend:
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-8280}:80"

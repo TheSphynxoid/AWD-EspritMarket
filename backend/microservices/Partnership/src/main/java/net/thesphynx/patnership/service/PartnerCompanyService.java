@@ -2,6 +2,7 @@ package net.thesphynx.patnership.service;
 
 import net.thesphynx.patnership.dto.PartnerCompanyDto;
 import net.thesphynx.patnership.entity.PartnerCompany;
+import net.thesphynx.patnership.messaging.PartnershipEventProducer;
 import net.thesphynx.patnership.repository.PartnerCompanyRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,9 +14,12 @@ import java.util.List;
 public class PartnerCompanyService {
 
     private final PartnerCompanyRepository partnerCompanyRepository;
+    private final PartnershipEventProducer partnershipEventProducer;
 
-    public PartnerCompanyService(PartnerCompanyRepository partnerCompanyRepository) {
+    public PartnerCompanyService(PartnerCompanyRepository partnerCompanyRepository,
+                                 PartnershipEventProducer partnershipEventProducer) {
         this.partnerCompanyRepository = partnerCompanyRepository;
+        this.partnershipEventProducer = partnershipEventProducer;
     }
 
     public List<PartnerCompanyDto> findAll() {
@@ -27,7 +31,10 @@ public class PartnerCompanyService {
     }
 
     public PartnerCompanyDto create(PartnerCompanyDto dto) {
-        return toDto(partnerCompanyRepository.save(toEntity(dto)));
+        PartnerCompany saved = partnerCompanyRepository.save(toEntity(dto));
+        // Notification asynchrone via RabbitMQ
+        partnershipEventProducer.notifyCompanyCreated(saved.getContactEmail(), saved.getName(), saved.getSector());
+        return toDto(saved);
     }
 
     public PartnerCompanyDto update(Long id, PartnerCompanyDto dto) {

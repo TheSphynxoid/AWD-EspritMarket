@@ -1,0 +1,221 @@
+# Stack complète EspritMarket (production / serveur).
+#
+#   cp .env.example .env              # puis adapter les mots de passe / BIND_IP
+#   docker compose pull               # images publiées par GitHub Actions (GHCR)
+#   docker compose up -d
+#
+# ou, pour construire les images sur la machine :  docker compose up -d --build
+#
+# Seuls le frontend (qui sert aussi /gw -> gateway et /auth -> Keycloak),
+# l'admin Keycloak et Prometheus sont publiés, et uniquement sur ${BIND_IP}.
+# Tout le reste reste sur le réseau Docker interne.
+name: awd-espritmarket
+
+x-spring: &spring
+  restart: unless-stopped
+  networks: [backend]
+  depends_on:
+    discovery:
+      condition: service_started
+
+x-spring-env: &spring-env
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka
+  EUREKA_INSTANCE_PREFERIPADDRESS: "true"
+  OPENAPI_SERVER_URL: /gw
+  RABBITMQ_HOST: rabbitmq
+  RABBITMQ_USERNAME: ${RABBITMQ_USER}
+  RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+  RABBITMQ_USER: ${RABBITMQ_USER}
+  RABBITMQ_PASS: ${RABBITMQ_PASSWORD}
+  SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+  SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+  JAVA_OPTS: -XX:MaxRAMPercentage=75 -Xss512k
+
+services:
+  # ---------------------------------------------------------------- infra
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [backend]
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+    networks: [backend]
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    volumes:
+      - ../keycloak:/opt/keycloak/data/import:ro
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${KEYCLOAK_PORT:-8281}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [backend]
+
+  # ---------------------------------------------------------------- spring cloud
+  discovery:
+    image: ${REGISTRY:-ghcr.io/thesphynxoid}/awd-espritmarket-discovery:${TAG:-latest}
+    build: ../backend/discovery
+    restart: unless-stopped
+    environment:
+      JAVA_OPTS: -XX:MaxRAMPercentage=75
+    networks: [backend]
+
+  gateway:
+    <<: *spring
+    image: ${REGISTRY:-ghcr.io/thesphynxoid}/awd-espritmarket-gateway:${TAG:-latest}
+    build: ../backend/gateway
+    environment:
+      <<: *spring-env
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY: INFO
+      LOGGING_LEVEL_REACTOR_NETTY_HTTP_CLIENT: INFO
+
+  # ---------------------------------------------------------------- microservices
+  user:
+    <<: *spring
+    image: ${REGISTRY:-ghcr.io/thesphynxoid}/awd-espritmarket-user:${TAG:-latest}
+    build: ../backend/microservices/User
+    environment:
+      <<: *spring-env
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: INFO
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: INFO
+
+  srv:
+    <<: *spring
+    image: ${REGISTRY:-ghcr.io/thesphynxoid}/awd-espritmarket-srv:${TAG:-latest}
+    build: ../backend/microservices/SRV
+    environment:
+      <<: *spring-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/srv_db
+    depends_on: &db-deps
+      discovery:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  marketplace:
+    <<: *spring
+    image: ${REGISTRY:-ghcr.io/thesphynxoid}/awd-espritmarket-marketplace:${TAG:-latest}
+    build: ../backend/microservices/marketplace
+    environment:
+      <<: *spring-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/marketplace_db
+    depends_on: *db-deps
+
+  delivery:
+    <<: *spring
+    image: ${REGISTRY:-ghcr.io/thesphynxoid}/awd-espritmarket-delivery:${TAG:-latest}
+    build: ../backend/microservices/Delivery
+    environment:
+      <<: *spring-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/delivery_db
+    depends_on: *db-deps
+
+  event:
+    <<: *spring
+    image: ${REGISTRY:-ghcr.io/thesphynxoid}/awd-espritmarket-event:${TAG:-latest}
+    build: ../backend/microservices/Event
+    environment:
+      <<: *spring-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/event_db
+    depends_on: *db-deps
+
+  partnership:
+    <<: *spring
+    image: ${REGISTRY:-ghcr.io/thesphynxoid}/awd-espritmarket-partnership:${TAG:-latest}
+    build: ../backend/microservices/Partnership
+    environment:
+      <<: *spring-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/partnership_db
+    depends_on: *db-deps
+
+  notification:
+    image: ${REGISTRY:-ghcr.io/thesphynxoid}/awd-espritmarket-notification:${TAG:-latest}
+    build: ../backend/microservices/Notification
+    restart: unless-stopped
+    environment:
+      EUREKA_URL: http://discovery:8761/eureka
+      HOST: notification
+      PORT: "8090"
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      discovery:
+        condition: service_started
+    networks: [backend]
+
+  # ---------------------------------------------------------------- frontend
+  frontend:
+    image: ${REGISTRY:-ghcr.io/thesphynxoid}/awd-espritmarket-frontend:${TAG:-latest}
+    build: ../frontend
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${FRONTEND_PORT:-8280}:80"
+    depends_on:
+      - gateway
+      - keycloak
+    networks: [backend]
+
+  # ---------------------------------------------------------------- observabilité
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${PROMETHEUS_PORT:-9095}:9090"
+    depends_on:
+      - discovery
+    networks: [backend]
+
+networks:
+  backend:
+
+volumes:
+  postgres_data:
+  prometheus_data:
