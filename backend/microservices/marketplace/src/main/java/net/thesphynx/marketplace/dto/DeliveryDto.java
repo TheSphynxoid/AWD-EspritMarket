@@ -26,8 +26,6 @@ public class DeliveryDto {
     private String phone;
     private Double deliveryFee;
     private DeliveryType deliveryType;
-    /** Produit marketplace livré (obligatoire côté delivery, qui vérifie sa disponibilité). */
-    private Long productId;
 
     /** En lecture seule cote delivery (PENDING a la creation). */
     private DeliveryStatus status;

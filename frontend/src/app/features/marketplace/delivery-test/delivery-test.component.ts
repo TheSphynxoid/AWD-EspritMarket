@@ -4,7 +4,6 @@ import { JsonPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MarketplaceService } from '../services/marketplace.service';
 import { Delivery } from '../models/delivery.model';
-import { Product } from '../models/product.model';
 
 @Component({
   selector: 'app-delivery-test',
@@ -22,8 +21,6 @@ export class DeliveryTestComponent implements OnInit {
   postalCode = '';
   phone = '';
   deliveryType: 'STANDARD' | 'EXPRESS' | 'SAME_DAY' = 'STANDARD';
-  productId: number | null = null;
-  products = signal<Product[]>([]);
 
   loading = signal(false);
   error = signal<string | null>(null);
@@ -32,10 +29,6 @@ export class DeliveryTestComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadList();
-    this.service.getAllProducts().subscribe({
-      next: (p) => this.products.set(p ?? []),
-      error: () => {},
-    });
   }
 
   loadList(): void {
@@ -46,7 +39,7 @@ export class DeliveryTestComponent implements OnInit {
   }
 
   submit(): void {
-    if (!this.recipientName || !this.address || !this.city || !this.postalCode || !this.phone || !this.productId) {
+    if (!this.recipientName || !this.address || !this.city || !this.postalCode || !this.phone) {
       this.error.set('Please fill all required fields');
       return;
     }
@@ -60,7 +53,6 @@ export class DeliveryTestComponent implements OnInit {
       phone: this.phone,
       deliveryFee: 8,
       deliveryType: this.deliveryType,
-      productId: this.productId,
     };
     this.service.createDeliverySync(payload).subscribe({
       next: (d) => {
@@ -69,7 +61,7 @@ export class DeliveryTestComponent implements OnInit {
         this.loadList();
       },
       error: (e) => {
-        this.error.set('Sync call failed: ' + (e?.error?.message || e?.message || 'unknown'));
+        this.error.set('Sync call failed: ' + (e?.message || 'unknown'));
         this.loading.set(false);
       },
     });
@@ -90,7 +82,6 @@ export class DeliveryTestComponent implements OnInit {
     this.postalCode = '';
     this.phone = '';
     this.deliveryType = 'STANDARD';
-    this.productId = null;
     this.result.set(null);
     this.error.set(null);
   }
