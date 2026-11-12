@@ -11,6 +11,12 @@ import { EventListComponent } from './features/events/event-list/event-list';
 import { EventDetailComponent } from './features/events/event-detail/event-detail';
 import { EventFormComponent } from './features/events/event-form/event-form';
 import { TicketsComponent } from './features/tickets/tickets';
+import { CompanyListComponent } from './features/partnership/company-list/company-list';
+import { JobOfferListComponent } from './features/partnership/job-offer-list/job-offer-list';
+import { JobOfferDetailComponent } from './features/partnership/job-offer-detail/job-offer-detail';
+import { ApplicationListComponent } from './features/partnership/application-list/application-list';
+import { InterviewListComponent } from './features/partnership/interview-list/interview-list';
+
 export const routes: Routes = [
   { path: '', redirectTo: 'services', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
@@ -25,4 +31,11 @@ export const routes: Routes = [
   { path: 'events/:id', component: EventDetailComponent, canActivate: [authGuard] },
   { path: 'events/:id/edit', component: EventFormComponent, canActivate: [authGuard] },
   { path: 'tickets', component: TicketsComponent, canActivate: [authGuard] },
+  // ── Partnership routes (no auth guard for easy testing) ──
+  { path: 'partnership', redirectTo: 'partnership/companies', pathMatch: 'full' },
+  { path: 'partnership/companies', component: CompanyListComponent },
+  { path: 'partnership/job-offers', component: JobOfferListComponent },
+  { path: 'partnership/job-offers/:id', component: JobOfferDetailComponent },
+  { path: 'partnership/applications', component: ApplicationListComponent },
+  { path: 'partnership/interviews', component: InterviewListComponent },
 ];
