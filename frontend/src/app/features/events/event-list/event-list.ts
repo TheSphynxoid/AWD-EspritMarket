@@ -7,33 +7,51 @@ import { RoleService } from '../../../core/services/role.service';
   selector: 'app-event-list',
   imports: [RouterLink],
   template: `
-    <div class="max-w-6xl mx-auto p-6">
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold">Événements</h1>
-        @if (role.isAdmin()) {
-          <a routerLink="/events/new" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Nouvel événement</a>
-        }
-      </div>
-      @if (loading()) {
-        <p class="text-slate-500">Chargement...</p>
-      } @else if (error()) {
-        <p class="text-red-600">{{ error() }}</p>
-      } @else if (events().length === 0) {
-        <p class="text-slate-500">Aucun événement.</p>
-      } @else {
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          @for (e of events(); track e.id) {
-            <a [routerLink]="['/events', e.id]" class="block bg-white rounded-xl shadow p-5 hover:shadow-lg transition">
-              <h2 class="text-xl font-semibold">{{ e.name }}</h2>
-              <p class="text-slate-600 text-sm mt-2">{{ e.location }}</p>
-              <div class="mt-4 flex items-center justify-between text-sm">
-                <span class="text-blue-600 font-medium">{{ e.status || '—' }}</span>
-                <span class="font-bold">{{ e.nbTickets != null ? (e.nbTickets + ' tickets') : '—' }}</span>
-              </div>
-            </a>
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-red-50 p-6">
+      <div class="max-w-6xl mx-auto">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h1 class="text-4xl font-bold text-slate-800">Événements</h1>
+            <p class="text-slate-500 mt-1">Découvrez et gérez les événements EspritMarket</p>
+          </div>
+          @if (role.isAdmin()) {
+            <a routerLink="/events/new" class="bg-red-600 text-white px-5 py-2.5 rounded-lg shadow hover:bg-red-700 transition">+ Nouvel événement</a>
           }
         </div>
-      }
+
+        @if (loading()) {
+          <div class="flex justify-center py-20">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+          </div>
+        } @else if (error()) {
+          <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4">{{ error() }}</div>
+        } @else if (events().length === 0) {
+          <div class="text-center py-20 text-slate-500">Aucun événement pour le moment.</div>
+        } @else {
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            @for (e of events(); track e.id) {
+              <a [routerLink]="['/events', e.id]" class="group bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden">
+                <div class="h-32 bg-gradient-to-r from-red-600 to-gray-800 flex items-center justify-center">
+                  <span class="text-white text-4xl font-bold opacity-80">{{ (e.name || '?').charAt(0) }}</span>
+                </div>
+                <div class="p-5">
+                  <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-xl font-semibold text-slate-800 group-hover:text-red-600 transition">{{ e.name }}</h2>
+                    <span class="text-xs font-medium px-2 py-1 rounded-full bg-red-100 text-red-700">{{ e.status || '—' }}</span>
+                  </div>
+                  <p class="text-slate-500 text-sm flex items-center gap-1">
+                    <span>📍</span> {{ e.location || '—' }}
+                  </p>
+                  <div class="mt-4 flex items-center justify-between text-sm">
+                    <span class="text-slate-600">{{ e.date || '—' }}</span>
+                    <span class="font-bold text-red-600">{{ e.nbTickets != null ? (e.nbTickets + ' tickets') : '—' }}</span>
+                  </div>
+                </div>
+              </a>
+            }
+          </div>
+        }
+      </div>
     </div>
   `,
 })
