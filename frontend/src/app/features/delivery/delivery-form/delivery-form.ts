@@ -114,7 +114,6 @@ import { Delivery, DeliveryType, Product, TYPE_LABELS, apiError } from '../deliv
     </div>
   `,
 })
-
 export class DeliveryFormComponent implements OnInit {
   private api = inject(DeliveryService);
   private route = inject(ActivatedRoute);
