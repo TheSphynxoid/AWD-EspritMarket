@@ -179,6 +179,8 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-notifications@espritmarket.local}
+      SMTP_TLS: ${SMTP_TLS:-true}
       # Mailtrap (prioritaire sur SMTP) : voir deploy/.env.example
       MAILTRAP_API_TOKEN: ${MAILTRAP_API_TOKEN:-}
       MAILTRAP_INBOX_ID: ${MAILTRAP_INBOX_ID:-}
