@@ -1,17 +1,23 @@
 package net.thesphynx.delivery.service;
 
+import feign.FeignException;
+import net.thesphynx.delivery.client.MarketplaceClient;
+import net.thesphynx.delivery.config.RabbitConfig;
 import net.thesphynx.delivery.dto.DeliveryDto;
+import net.thesphynx.delivery.dto.ProductDto;
 import net.thesphynx.delivery.entity.Deliverer;
 import net.thesphynx.delivery.entity.Delivery;
 import net.thesphynx.delivery.enums.DeliveryStatus;
 import net.thesphynx.delivery.repository.DelivererRepository;
 import net.thesphynx.delivery.repository.DeliveryRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DeliveryService {
@@ -19,12 +25,19 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final DelivererRepository delivererRepository;
     private final DelivererService delivererService;
+    private final MarketplaceClient marketplaceClient;
+    private final DeliveryFeeService deliveryFeeService;
+    private final RabbitTemplate rabbitTemplate;
 
     public DeliveryService(DeliveryRepository deliveryRepository, DelivererRepository delivererRepository,
-                           DelivererService delivererService) {
+                           DelivererService delivererService, MarketplaceClient marketplaceClient,
+                           DeliveryFeeService deliveryFeeService, RabbitTemplate rabbitTemplate) {
         this.deliveryRepository = deliveryRepository;
         this.delivererRepository = delivererRepository;
         this.delivererService = delivererService;
+        this.marketplaceClient = marketplaceClient;
+        this.deliveryFeeService = deliveryFeeService;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public List<DeliveryDto> findAll() {
@@ -36,13 +49,34 @@ public class DeliveryService {
     }
 
     public DeliveryDto create(DeliveryDto dto) {
+        ensureProductAvailable(dto.getProductId());
+        Delivery delivery = toEntity(dto);
+        delivery.setDeliveryFee(deliveryFeeService.getAmount(delivery.getDeliveryType()));
         // status = PENDING et createdAt générés dans @PrePersist
-        return toDto(deliveryRepository.save(toEntity(dto)));
+        Delivery saved = deliveryRepository.save(delivery);
+
+        // Communication asynchrone : notification envoyée dans RabbitMQ (on n'attend pas de réponse)
+        Map<String, Object> message = Map.of(
+                "deliveryId", saved.getId(),
+                "recipientName", saved.getRecipientName(),
+                "message", "Votre livraison a été créée",
+                "type", "delivery"
+        );
+        rabbitTemplate.convertAndSend(RabbitConfig.NOTIFICATION_QUEUE, message);
+
+        return toDto(saved);
     }
 
     public DeliveryDto update(Long id, DeliveryDto dto) {
         Delivery delivery = getDelivery(id);
         ensureNotClosed(delivery);
+        if (!dto.getProductId().equals(delivery.getProductId())) {
+            ensureProductAvailable(dto.getProductId());
+        }
+        // Le tarif n'est recalculé que si le type de livraison change.
+        if (dto.getDeliveryType() != delivery.getDeliveryType()) {
+            delivery.setDeliveryFee(deliveryFeeService.getAmount(dto.getDeliveryType()));
+        }
         updateEntity(delivery, dto);
         return toDto(deliveryRepository.save(delivery));
     }
@@ -98,27 +132,43 @@ public class DeliveryService {
                         HttpStatus.NOT_FOUND, "Livraison introuvable : " + id));
     }
 
+    /** Appel synchrone vers marketplace : le produit doit exister, être actif et en stock. */
+    private void ensureProductAvailable(Long productId) {
+        ProductDto product;
+        try {
+            product = marketplaceClient.getProduct(productId);
+        } catch (FeignException.NotFound e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produit introuvable : " + productId);
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "Microservice marketplace indisponible");
+        }
+        if (!Boolean.TRUE.equals(product.active()) || product.stock() == null || product.stock() <= 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Produit indisponible : " + productId);
+        }
+    }
+
     private Delivery toEntity(DeliveryDto dto) {
         Delivery delivery = new Delivery();
         updateEntity(delivery, dto);
         return delivery;
     }
 
-    /** status, createdAt et delivererId ne sont jamais pris depuis le DTO. */
+    /** status, createdAt, delivererId et deliveryFee ne sont jamais pris depuis le DTO. */
     private void updateEntity(Delivery delivery, DeliveryDto dto) {
         delivery.setRecipientName(dto.getRecipientName());
         delivery.setAddress(dto.getAddress());
         delivery.setCity(dto.getCity());
         delivery.setPostalCode(dto.getPostalCode());
         delivery.setPhone(dto.getPhone());
-        delivery.setDeliveryFee(dto.getDeliveryFee());
         delivery.setDeliveryType(dto.getDeliveryType());
+        delivery.setProductId(dto.getProductId());
     }
 
     private DeliveryDto toDto(Delivery delivery) {
         return new DeliveryDto(delivery.getId(), delivery.getRecipientName(), delivery.getAddress(),
                 delivery.getCity(), delivery.getPostalCode(), delivery.getPhone(), delivery.getDeliveryFee(),
-                delivery.getDeliveryType(), delivery.getStatus(), delivery.getCreatedAt(),
+                delivery.getDeliveryType(), delivery.getProductId(), delivery.getStatus(), delivery.getCreatedAt(),
                 delivery.getDeliverer() != null ? delivery.getDeliverer().getId() : null);
     }
 

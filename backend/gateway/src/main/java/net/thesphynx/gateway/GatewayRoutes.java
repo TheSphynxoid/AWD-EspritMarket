@@ -49,6 +49,9 @@ public class GatewayRoutes {
 
                 .route("delivery", r -> r.path("/delivery/**")
                         .uri("lb://DELIVERY"))
+                 
+                .route("delivery-api", r -> r.path("/api/deliveries/**", "/api/deliverers/**", "/api/vehicles/**")
+                        .uri("lb://DELIVERY"))
 
                 .route("event", r -> r.path("/event/**")
                         .filters(f -> f.stripPrefix(1))

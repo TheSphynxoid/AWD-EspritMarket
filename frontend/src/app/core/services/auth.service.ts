@@ -35,6 +35,18 @@ export class AuthService {
     }
   }
 
+  /** Rôle de realm Keycloak présent dans le token (realm_access.roles). */
+  hasRole(role: string): boolean {
+    const t = this.token;
+    if (!t) return false;
+    try {
+      const payload = JSON.parse(atob(t.split('.')[1]));
+      return (payload.realm_access?.roles ?? []).includes(role);
+    } catch {
+      return false;
+    }
+  }
+
   login(username: string, password: string): Observable<any> {
     const body = new URLSearchParams();
     body.set('grant_type', 'password');
