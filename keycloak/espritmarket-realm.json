@@ -6,6 +6,14 @@
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN_DELIVERY",
+        "description": "Administration des livraisons (pages /admin-delivery)"
+      }
+    ]
+  },
   "clients": [
     {
       "clientId": "user-service",
