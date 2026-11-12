@@ -2,6 +2,7 @@ package net.thesphynx.delivery.service;
 
 import feign.FeignException;
 import net.thesphynx.delivery.client.MarketplaceClient;
+import net.thesphynx.delivery.config.RabbitConfig;
 import net.thesphynx.delivery.dto.DeliveryDto;
 import net.thesphynx.delivery.dto.ProductDto;
 import net.thesphynx.delivery.entity.Deliverer;
@@ -9,12 +10,14 @@ import net.thesphynx.delivery.entity.Delivery;
 import net.thesphynx.delivery.enums.DeliveryStatus;
 import net.thesphynx.delivery.repository.DelivererRepository;
 import net.thesphynx.delivery.repository.DeliveryRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DeliveryService {
@@ -24,15 +27,17 @@ public class DeliveryService {
     private final DelivererService delivererService;
     private final MarketplaceClient marketplaceClient;
     private final DeliveryFeeService deliveryFeeService;
+    private final RabbitTemplate rabbitTemplate;
 
     public DeliveryService(DeliveryRepository deliveryRepository, DelivererRepository delivererRepository,
                            DelivererService delivererService, MarketplaceClient marketplaceClient,
-                           DeliveryFeeService deliveryFeeService) {
+                           DeliveryFeeService deliveryFeeService, RabbitTemplate rabbitTemplate) {
         this.deliveryRepository = deliveryRepository;
         this.delivererRepository = delivererRepository;
         this.delivererService = delivererService;
         this.marketplaceClient = marketplaceClient;
         this.deliveryFeeService = deliveryFeeService;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public List<DeliveryDto> findAll() {
@@ -48,7 +53,18 @@ public class DeliveryService {
         Delivery delivery = toEntity(dto);
         delivery.setDeliveryFee(deliveryFeeService.getAmount(delivery.getDeliveryType()));
         // status = PENDING et createdAt générés dans @PrePersist
-        return toDto(deliveryRepository.save(delivery));
+        Delivery saved = deliveryRepository.save(delivery);
+
+        // Communication asynchrone : notification envoyée dans RabbitMQ (on n'attend pas de réponse)
+        Map<String, Object> message = Map.of(
+                "deliveryId", saved.getId(),
+                "recipientName", saved.getRecipientName(),
+                "message", "Votre livraison a été créée",
+                "type", "delivery"
+        );
+        rabbitTemplate.convertAndSend(RabbitConfig.NOTIFICATION_QUEUE, message);
+
+        return toDto(saved);
     }
 
     public DeliveryDto update(Long id, DeliveryDto dto) {
