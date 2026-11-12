@@ -67,7 +67,7 @@ import { ServicesTabsComponent } from '../services-tabs';
               <div class="p-5">
                 <div class="flex items-start justify-between gap-2">
                   <h2 class="text-lg font-semibold">{{ s.name }}</h2>
-                  @if (s.providerId === myId()) {
+                  @if (myId() && s.providerId === myId()) {
                     <span class="text-xs bg-slate-900 text-white rounded-full px-2 py-0.5 shrink-0">Mon service</span>
                   }
                 </div>
