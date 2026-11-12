@@ -1,0 +1,32 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Découverte automatique de tous les microservices Spring via Eureka
+  - job_name: spring-services
+    metrics_path: /actuator/prometheus
+    eureka_sd_configs:
+      - server: http://discovery:8761/eureka
+        refresh_interval: 30s
+    relabel_configs:
+      # Notification (Python) n'expose pas /actuator/prometheus
+      - source_labels: [__meta_eureka_app_name]
+        regex: NOTIFICATION
+        action: drop
+      - source_labels: [__meta_eureka_app_name]
+        target_label: application
+      - source_labels: [__meta_eureka_app_instance_id]
+        target_label: instance
+
+  # Eureka ne s'enregistre pas lui-même
+  - job_name: discovery
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["discovery:8761"]
+        labels:
+          application: DISCOVERY
