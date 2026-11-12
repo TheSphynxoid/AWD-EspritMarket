@@ -1,6 +1,6 @@
 @startuml architecture-physique
 
-title <size:22>**Architecture physique (déploiement) — EspritMarket**</size>
+title <size:22>**Architecture physique (déploiement Docker) — EspritMarket**</size>
 
 skinparam dpi 150
 skinparam shadowing false
@@ -8,79 +8,74 @@ skinparam defaultFontName "Segoe UI"
 skinparam rectangleRoundCorner 12
 skinparam packageRectangleRoundCorner 18
 skinparam ArrowFontSize 12
+skinparam ArrowColor #444444
+skinparam nodesep 35
+skinparam ranksep 55
 
 skinparam rectangle {
   BackgroundColor #FFFFFF
   BorderColor #333333
 }
-
-actor "Poste client\nNavigateur" as Client
-
-rectangle "**Frontend Angular**\nSPA\n<b>:4200</b>" as FE #E8F5E9
-
-rectangle "**API Gateway**\nSpring Cloud Gateway\n<b>:8088</b>" as GW #EFEFEF
-
-rectangle "**Eureka**\nSpring Cloud Netflix\n<b>:8761</b>" as EU #EFEFEF
-
-rectangle "**Keycloak**\nOAuth2 / JWT\n<b>:8180</b>" as KC #FFF3E0
-
-package "Serveurs applicatifs (microservices)" as APP #DFF2F0 {
-  rectangle "**SRV**\nSpring Boot\n<b>:8082</b>" as SRV
-  rectangle "**marketplace**\nSpring Boot\n<b>:8083</b>" as MKT
-  rectangle "**Delivery**\nSpring Boot\n<b>:8084</b>" as DEL
-  rectangle "**event**\nSpring Boot\n<b>:8085</b>" as EVT
-  rectangle "**Patnership**\nSpring Boot\n<b>:8086</b>" as PTN
-  rectangle "**User**\nSpring Boot\n<b>:8087</b>" as USR
-  rectangle "**Notification**\nPython / FastAPI\n<b>:8090</b>" as NOT
-  SRV -[hidden]right-> MKT
-  MKT -[hidden]right-> DEL
-  DEL -[hidden]right-> EVT
-  EVT -[hidden]right-> PTN
-  PTN -[hidden]right-> USR
-  USR -[hidden]right-> NOT
+skinparam node {
+  BackgroundColor #FAFAFA
+  BorderColor #333333
 }
 
-package "Serveur PostgreSQL" as DBS #FDEBD2 {
-  database "**awd-Delivery**" as AWDDB
-  database "**awd-event**" as EVTDB
-  database "**awd-Partnership**" as PTNDB
-  database "**awd-srv**" as SRVDB
-  database "**keycloak**" as KCDB
-  AWDDB -[hidden]right-> EVTDB
-  EVTDB -[hidden]right-> PTNDB
-  PTNDB -[hidden]right-> SRVDB
-  SRVDB -[hidden]right-> KCDB
+actor "Navigateur" as Client
+cloud "Internet\n(tunnel Cloudflare,\noptionnel)" as CF #F5F5F5
+rectangle "**GitHub Actions**\nimages → GHCR" as CI #F5F5F5
+
+node "Serveur — docker compose (deploy/)" as HOST {
+
+  rectangle "**frontend** (nginx)\nAngular + proxy /gw, /auth\n<b>publié :8280</b>" as FE #E8F5E9
+  rectangle "**keycloak** 24\n<b>publié :8281</b> (admin)" as KC #FFF3E0
+  rectangle "**prometheus**\n<b>publié :9095</b>" as PROM #F3E5F5
+
+  package "réseau interne « backend » (non publié)" as NET #F7FBFF {
+    rectangle "**gateway** :8088" as GW #EFEFEF
+    rectangle "**discovery** (Eureka) :8761" as EU #EFEFEF
+
+    rectangle "**srv** :8082" as SRV
+    rectangle "**marketplace** :8083" as MKT
+    rectangle "**delivery** :8084" as DEL
+    rectangle "**event** :8085" as EVT
+    rectangle "**user** :8087" as USR
+    rectangle "**partnership** :8089" as PTN
+    rectangle "**notification** :8090\nPython" as NOT #E3F2FD
+
+    rectangle "**rabbitmq** :5672\nfile « notifications »\n<size:11>publiée par srv, event, marketplace,</size>\n<size:11>delivery, partnership</size>" as RMQ #E3F2FD
+    database "**postgres** 16 :5432\nkeycloak, srv_db, marketplace_db,\ndelivery_db, event_db, partnership_db" as PG #FDEBD2
+  }
 }
 
-rectangle "**RabbitMQ**\nbroker de messages\n<b>:5672 / :15672</b>" as RMQ #E3F2FD
+rectangle "**Mailtrap**" as MAIL #F5F5F5
 
-Client -down-> FE : HTTP
-FE -down-> GW : HTTP
+Client -down-> CF : HTTPS
+CF -down-> FE : HTTP
+FE -down-> GW : /gw/**
+FE -right-> KC : /auth/**
 
-Client -[hidden]right-> EU
+GW -down-> SRV
+GW -down-> MKT
+GW -down-> DEL
+GW -down-> EVT
+GW -down-> USR
+GW -down-> PTN
+GW .left.> EU : lb://
 
-GW -down-> APP : HTTP
-GW .up.> EU : enregistrement
+SRV -down-> PG
+MKT -down-> PG
+DEL -down-> PG
+EVT -down-> PG
+PTN -down-> PG
+KC -down-> PG
 
-SRV .up.> EU : enregistrement
-MKT .up.> EU : enregistrement
-DEL .up.> EU : enregistrement
-EVT .up.> EU : enregistrement
-PTN .up.> EU : enregistrement
-USR .up.> EU : enregistrement
-NOT .up.> EU : enregistrement
+SRV -down-> RMQ
+EVT -down-> RMQ
+RMQ -right-> NOT : AMQP
+NOT -right-> MAIL : SMTP
 
-USR .up.> KC : OAuth2 / JWT
-KC -down-> KCDB : JDBC
-
-DEL -down-> AWDDB : JDBC
-EVT -down-> EVTDB : JDBC
-PTN -down-> PTNDB : JDBC
-SRV -down-> SRVDB : JDBC
-
-EVT -right-> RMQ : publication (async)
-RMQ -right-> NOT : consommation (async)
-
-NOT -down-> RMQ : fallback / publish
+PROM .down.> EU : découverte des cibles\n/actuator/prometheus
+CI .down.> HOST : docker compose pull
 
 @enduml

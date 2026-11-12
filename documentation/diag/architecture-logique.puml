@@ -8,79 +8,76 @@ skinparam defaultFontName "Segoe UI"
 skinparam rectangleRoundCorner 12
 skinparam packageRectangleRoundCorner 18
 skinparam ArrowFontSize 12
+skinparam ArrowColor #444444
+skinparam nodesep 40
+skinparam ranksep 60
 
 skinparam rectangle {
   BackgroundColor #FFFFFF
   BorderColor #333333
 }
-
-actor "Poste client\nNavigateur" as Client
-
-rectangle "**Frontend Angular**\nSPA\n<b>:4200</b>" as FE #E8F5E9
-
-rectangle "**API Gateway**\nSpring Cloud Gateway\n<b>port :8088</b>" as GW #EFEFEF
-
-rectangle "**Eureka Server**\n(annuaire des services)\n<b>:8761</b>" as EU #EFEFEF
-
-rectangle "**Keycloak**\nOAuth2 / JWT\n<b>:8180</b>" as KC #FFF3E0
-
-package "Microservices Spring Boot / Python" as MS #DFF2F0 {
-  rectangle "**SRV**\noffres de services, réservations\n<b>port :8082</b>" as SRV
-  rectangle "**marketplace**\nplace de marché\n<b>port :8083</b>" as MKT
-  rectangle "**Delivery**\nlivraisons\n<b>port :8084</b>" as DEL
-  rectangle "**event**\névénementiel\n<b>port :8085</b>" as EVT
-  rectangle "**Patnership**\npartenariats\n<b>port :8086</b>" as PTN
-  rectangle "**User**\nutilisateurs sécurisés\n<b>port :8087</b>" as USR
-  rectangle "**Notification**\nPython / FastAPI\n<b>port :8090</b>" as NOT
-  SRV -[hidden]right-> MKT
-  MKT -[hidden]right-> DEL
-  DEL -[hidden]right-> EVT
-  EVT -[hidden]right-> PTN
-  PTN -[hidden]right-> USR
-  USR -[hidden]right-> NOT
+skinparam database {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
 }
 
-package "Serveur PostgreSQL" as DBS #FDEBD2 {
-  database "**awd-Delivery**\n<b>:5432</b>" as AWDDB
-  database "**awd-event**\n<b>:5432</b>" as EVTDB
-  database "**awd-Partnership**\n<b>:5432</b>" as PTNDB
-  database "**awd-srv**\n<b>:5432</b>" as SRVDB
-  database "**keycloak**\n<b>:5432</b>" as KCDB
-  AWDDB -[hidden]right-> EVTDB
-  EVTDB -[hidden]right-> PTNDB
-  PTNDB -[hidden]right-> SRVDB
-  SRVDB -[hidden]right-> KCDB
+actor "Utilisateur\n(navigateur)" as Client
+
+rectangle "**Frontend Angular**\nSPA" as FE #E8F5E9
+rectangle "**Keycloak**\nrealm espritmarket\nOAuth2 / JWT" as KC #FFF3E0
+rectangle "**API Gateway**\nSpring Cloud Gateway\nvalidation JWT, CORS, Swagger" as GW #EFEFEF
+rectangle "**Eureka**\nannuaire des services" as EU #EFEFEF
+
+package "Microservices (un domaine, une base)" as MS #DFF2F0 {
+  rectangle "**SRV**\nservices, réservations" as SRV
+  rectangle "**marketplace**\nboutiques, produits, panier" as MKT
+  rectangle "**Delivery**\nlivraisons, livreurs" as DEL
+  rectangle "**Event**\névénements, billets" as EVT
+  rectangle "**Partnership**\nentreprises, offres, candidatures" as PTN
+  rectangle "**User**\ncomptes, profil" as USR
 }
 
-rectangle "**RabbitMQ**\nbroker de messages\n<b>:5672 / :15672</b>" as RMQ #E3F2FD
+rectangle "**RabbitMQ**\nfile « notifications »" as RMQ #E3F2FD
+rectangle "**Notification**\nPython / FastAPI" as NOT #E3F2FD
+rectangle "**Mailtrap**\nSMTP / API" as MAIL #F5F5F5
 
-Client -down-> FE : HTTP
-FE -down-> GW : appel HTTP
+package "PostgreSQL" as DBS #FDEBD2 {
+  database "srv_db" as SRVDB
+  database "marketplace_db" as MKTDB
+  database "delivery_db" as DELDB
+  database "event_db" as EVTDB
+  database "partnership_db" as PTNDB
+}
 
-Client -[hidden]right-> EU
+' --- accès utilisateur
+Client -down-> FE : HTTPS
+FE -right-> KC : connexion (token)
+FE -down-> GW : REST + JWT
+GW .right.> KC : clés publiques (JWK)
+GW -down-> MS : routage lb://
+GW .left.> EU : découverte
+MS .up.> EU : enregistrement
 
-GW -down-> MS : appel REST
-GW .up.> EU : enregistrement
+' --- appels synchrones (OpenFeign)
+MKT <-right-> DEL : Feign
+PTN -left-> EVT : Feign
+USR .up.> KC : création des comptes\n(API admin)
 
-SRV .up.> EU : enregistrement
-MKT .up.> EU : enregistrement
-DEL .up.> EU : enregistrement
-EVT .up.> EU : enregistrement
-PTN .up.> EU : enregistrement
-USR .up.> EU : enregistrement
-NOT .up.> EU : enregistrement
+' --- persistance
+SRV -down-> SRVDB
+MKT -down-> MKTDB
+DEL -down-> DELDB
+EVT -down-> EVTDB
+PTN -down-> PTNDB
 
-USR .up.> KC : OAuth2 / JWT
-KC -down-> KCDB : JDBC
+' --- asynchrone
+MS -right-> RMQ : publication\n(réservations, événements,\nlivraisons...)
+RMQ -down-> NOT : consommation
+NOT -down-> MAIL : email
 
-DEL -down-> AWDDB : JDBC
-EVT -down-> EVTDB : JDBC
-PTN -down-> PTNDB : JDBC
-SRV -down-> SRVDB : JDBC
-
-EVT -right-> RMQ : publication (async)
-RMQ -right-> NOT : consommation (async)
-
-NOT -down-> RMQ : fallback / publish
+legend right
+  —— synchrone (HTTP / JDBC)
+  - - - découverte / sécurité
+endlegend
 
 @enduml
