@@ -17,6 +17,12 @@
         <input [(ngModel)]="city" placeholder="City" class="w-full border rounded px-3 py-2" />
         <input [(ngModel)]="postalCode" placeholder="Postal code" class="w-full border rounded px-3 py-2" />
         <input [(ngModel)]="phone" placeholder="Phone" class="w-full border rounded px-3 py-2" />
+        <select [(ngModel)]="productId" class="w-full border rounded px-3 py-2">
+          <option [ngValue]="null" disabled>Product to deliver</option>
+          @for (p of products(); track p.id) {
+            <option [ngValue]="p.id">{{ p.name }} — {{ p.price }} DT (stock {{ p.stock }})</option>
+          }
+        </select>
         <div class="text-sm text-slate-500">Delivery fee: 8 DT (fixed)</div>
         <select [(ngModel)]="deliveryType" class="w-full border rounded px-3 py-2">
           <option value="STANDARD">STANDARD</option>

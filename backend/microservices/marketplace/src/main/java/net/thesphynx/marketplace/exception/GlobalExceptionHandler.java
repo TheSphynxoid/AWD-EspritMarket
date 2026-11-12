@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.dao.DataAccessException;
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDatabase(DataAccessException ex) {
         LOGGER.error("Erreur d'accès à la base marketplace", ex);
         return response(HttpStatus.INTERNAL_SERVER_ERROR, "Erreur lors de la lecture des données marketplace. Consultez les logs du service.");
+    }
+
+    /** Erreur renvoyée par un autre microservice (Feign) : on relaie un 4xx tel quel, sinon 502. */
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ErrorResponse> handleFeign(FeignException ex) {
+        String detail = ex.contentUTF8();
+        if (ex.status() >= 400 && ex.status() < 500) {
+            HttpStatus status = HttpStatus.resolve(ex.status());
+            return response(status != null ? status : HttpStatus.BAD_REQUEST,
+                    "Requête refusée par le service distant : " + (detail == null || detail.isBlank() ? ex.getMessage() : detail));
+        }
+        LOGGER.error("Appel inter-service en échec", ex);
+        return response(HttpStatus.BAD_GATEWAY, "Service distant indisponible, réessayez plus tard.");
     }
 
     private ResponseEntity<ErrorResponse> response(HttpStatus status, String message) {
