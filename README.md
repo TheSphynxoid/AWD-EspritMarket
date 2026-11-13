@@ -72,6 +72,9 @@ Navigateur ──► frontend (nginx, Angular)
 Les lectures publiques (catalogue des services, boutiques/produits, entreprises et offres d'emploi)
 sont accessibles sans connexion ; toutes les écritures demandent un JWT.
 
+Chaque service a son propre `README.md` (rôle, port, lancement, API, communication), regroupés aussi dans
+[`documentation/services/`](documentation/services/).
+
 ### Documentation de l'API
 
 Swagger centralisé sur la gateway : <http://localhost:8088/swagger-ui.html>
@@ -194,7 +197,7 @@ backend/
   gateway/              Spring Cloud Gateway (sécurité JWT, routes, Swagger centralisé)
   microservices/        SRV, marketplace, Delivery, Event, Partnership, User, Notification
 deploy/                 Docker Compose de production, .env.example, init PostgreSQL, Prometheus
-documentation/          diagrammes d'architecture (sources Eraser + PNG)
+documentation/          diagrammes d'architecture (sources Eraser + PNG), README de chaque service
 frontend/               application Angular (+ nginx.conf et Dockerfile de production)
 keycloak/               realm espritmarket importé au démarrage de Keycloak
 docker-compose.yml      infrastructure de développement local (Keycloak + RabbitMQ)
